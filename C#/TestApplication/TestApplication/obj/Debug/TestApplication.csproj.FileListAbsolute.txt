@@ -1,0 +1,12 @@
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\bin\Debug\TestApplication.exe.config
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\bin\Debug\TestApplication.exe
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\bin\Debug\TestApplication.pdb
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\bin\Debug\AudioSwitcher.AudioApi.CoreAudio.dll
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\bin\Debug\AudioSwitcher.AudioApi.dll
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\obj\Debug\TestApplication.csprojAssemblyReference.cache
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\obj\Debug\TestApplication.Properties.Resources.resources
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\obj\Debug\TestApplication.csproj.GenerateResource.cache
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\obj\Debug\TestApplication.csproj.CoreCompileInputs.cache
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\obj\Debug\TestApplication.csproj.CopyComplete
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\obj\Debug\TestApplication.exe
+D:\Documents\GitHub\media-remote-new\C#\TestApplication\TestApplication\obj\Debug\TestApplication.pdb
