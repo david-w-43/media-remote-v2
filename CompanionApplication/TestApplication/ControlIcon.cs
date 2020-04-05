@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace TestApplication
+namespace CompanionApplication
 {
     /// <summary>
     /// System tray icon

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestApplication
+namespace CompanionApplication
 {
     /// <summary>
     /// Serial connection to remote
@@ -12,7 +12,7 @@ namespace TestApplication
     public class RemoteConnection
     {
         // Constant declarations
-        private const int baudRate = 9600; // Baud rate to use
+        private const int baudRate = 19200; // Baud rate to use
         private const string handshakeString = "CONNECTIONREQUEST"; // Initiates handshake
         private const string handshakeResponse = "REQUESTACCEPTED"; // The correct response to receive
 
@@ -164,7 +164,7 @@ namespace TestApplication
                         string key = line.Substring(0, parametersStart - 1);
                         string parametersStr = line.Substring(parametersStart, parametersEnd - parametersStart);
 
-                        // Define list of parameters
+                        // Parse parameters, create list
                         List<string> parameters = new List<string>();
                         if (line.Contains(CommandHandler.separator))
                         {
@@ -175,21 +175,8 @@ namespace TestApplication
                             parameters.Add(parametersStr);
                         }
 
-                        // Commands that may be called in any mode
-                        switch (key)
-                        {
-                            case "MODESWITCH":
-                                // Handles the changing of mode
-                                commandHandler.ModeSwitch(int.Parse(parameters[0]));
-                                break;
-                            default:
-                                Console.WriteLine("No method to handle command " + key);
-                                break;
-                        }
-
-                        // Switch depending on current device mode
-
-
+                        // Pass command to command handler
+                        commandHandler.HandleCommand(key, parameters);
                     }
                 }
             }

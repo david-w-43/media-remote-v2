@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestApplication.VLC
+namespace CompanionApplication.VLC
 {
     /// <summary>
     /// Interface for VLC Media Player using TCP socket
     /// </summary>
-    class Interface
+    public class Interface
     {
         public enum RepeatMode { off, all, one };
         // Play status
@@ -26,7 +26,7 @@ namespace TestApplication.VLC
             public string album;
             public int trackLength;
             public int playbackPos;
-            public int volume;
+            public int volume; // 0 - 100
             public RepeatMode repeatMode;
             public bool shuffle;
             public string filepath;
@@ -59,6 +59,11 @@ namespace TestApplication.VLC
 
             // Connect to socket
             client.ConnectToServer(hostname, port);
+
+            // Initialise values, these cannot be read from VLC console
+            Shuffle(false);
+            Repeat(RepeatMode.off);
+            System.Threading.Thread.Sleep(50);
 
             // Start timer to update metadata
             updateTimer.Elapsed += UpdateInformation;
@@ -98,7 +103,8 @@ namespace TestApplication.VLC
                     int end = line.LastIndexOf(" )");
                     string substring = line.Substring(start, end - start);
                     //Console.WriteLine(substring);
-                    int.TryParse(substring, out currentValues.volume);
+                    int.TryParse(substring, out int volume);
+                    currentValues.volume = MapTo100(volume);
                     //Console.WriteLine(currentValues.volume);
                 } else if (line.Contains("state"))
                 {
@@ -183,7 +189,7 @@ namespace TestApplication.VLC
             }
 
             // Send updated data to remote
-            if (currentValues.volume != prevValues.volume) { toSend.Add("VOLUME(" + MapTo100(currentValues.volume) + ")"); }
+            if (currentValues.volume != prevValues.volume) { toSend.Add("VOLUME(" + currentValues.volume + ")"); }
             if (currentValues.playStatus != prevValues.playStatus) { toSend.Add("STATUS(" + currentValues.playStatus + ")"); }
             if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add("TIME(" + currentValues.playbackPos + ")"); }
 
@@ -213,6 +219,115 @@ namespace TestApplication.VLC
         private int MapTo100(int input)
         {
             return (int)(input * (100f / 256f));
+        }
+
+        /// <summary>
+        /// Internally, VLC uses 100% volume = 256
+        /// </summary>
+        /// <param name="input">256=100% volume</param>
+        /// <returns>Volume mapped to 0 - 256</returns>
+        private int MapTo256(int input)
+        {
+            return (int)(input / (100f / 256f));
+        }
+
+        /// <summary>
+        /// Changes volume by set amount
+        /// </summary>
+        /// <param name="change">Signed change in volume</param>
+        public void VolumeAdjust(int change)
+        {
+            currentValues.volume += change;
+            if (currentValues.volume < 0) { currentValues.volume = 0; }
+            else if (currentValues.volume > 125) { currentValues.volume = 125; }
+            client.SendLine("volume " + MapTo256(currentValues.volume));
+        }
+
+        public void Next() { client.SendLine("next"); }
+        public void Prev()
+        {
+            // If at beginning of track, go to previous
+            if (currentValues.playbackPos < 3)
+            {
+                client.SendLine("prev");
+            } else
+            {
+                // Else go to beginning of track
+                client.SendLine("seek 0");
+            }
+        }
+        public void Pause() { client.SendLine("pause"); }
+
+        /// <summary>
+        /// Toggles shuffle mode
+        /// </summary>
+        public void ShuffleToggle()
+        {
+            // Toggle shuffle
+            currentValues.shuffle = !currentValues.shuffle;
+            Shuffle(currentValues.shuffle);
+        }
+
+        /// <summary>
+        /// Sets shuffle mode 
+        /// </summary>
+        /// <param name="enabled"></param>
+        public void Shuffle(bool enabled)
+        {
+            currentValues.shuffle = enabled;
+
+            string onOff = null;
+            if (enabled) { onOff = "on"; } else { onOff = "off"; }
+            client.SendLine("random " + onOff);
+            remoteConnection.Send("SHUFFLE(" + onOff + ")");
+        }
+
+        /// <summary>
+        /// Increments the repeat mode and updates display and VLC
+        /// </summary>
+        public void RepeatInc()
+        {
+            // If not the last repeat mode
+            if (currentValues.repeatMode != (RepeatMode)2)
+            {
+                // Increment it
+                currentValues.repeatMode += 1;
+            } else {
+                // Set to off
+                currentValues.repeatMode = RepeatMode.off;
+            }
+
+            Repeat(currentValues.repeatMode);
+        }
+
+        /// <summary>
+        /// Updates repeat mode
+        /// </summary>
+        /// <param name="mode"></param>
+        private void Repeat(RepeatMode mode)
+        {
+            // Update VLC
+            switch (mode)
+            {
+                case RepeatMode.off:
+                    client.SendLine("loop off");
+                    client.SendLine("repeat off");
+                    break;
+                case RepeatMode.all:
+                    client.SendLine("loop on");
+                    client.SendLine("repeat off");
+                    break;
+                case RepeatMode.one:
+                    client.SendLine("loop off");
+                    client.SendLine("repeat on");
+                    break;
+            }
+
+            // Set current values
+            currentValues.repeatMode = mode;
+
+            // Update display
+            remoteConnection.Send("REPEATMODE(" + (int)currentValues.repeatMode + ")");
         }
     }
 }
