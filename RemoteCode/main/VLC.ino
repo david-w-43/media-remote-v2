@@ -1,32 +1,29 @@
 // Display constants
 #define TITLE_X 0
-#define TITLE_Y 15
+#define TITLE_Y 14
 const uint8_t* TITLE_FONT = helv14R;
 
 #define ARTIST_X 0
-#define ARTIST_Y 30
+#define ARTIST_Y 31
 const uint8_t* ARTIST_FONT = helv12R;
 
 #define ALBUM_X 0
-#define ALBUM_Y 30
+#define ALBUM_Y 31
 const uint8_t* ALBUM_FONT = helv12R;
 
 #define VOLUME_X 0
 #define VOLUME_Y 45
 const uint8_t* VOLUME_FONT = helv8R;
 
-#define SHUFFLE_X 64
+#define SHUFFLE_X 96
 #define SHUFFLE_Y 45
 
-#define REPEAT_X 96
+#define REPEAT_X 64
 #define REPEAT_Y 45
 
-#define BAR_Y 60
+#define BAR_Y 55
 #define MARKER_RADIUS 2
-const uint8_t* BAR_FONT = helv8R;
-
-// Toggles whether the album title is displayed instead of artist
-#define DISPLAY_ALBUM 0
+const uint8_t* BAR_FONT = helv8RN;
 
 // Repeat mode enumerator
 enum VLCRepeatMode { OFF, ALL, ONE };
@@ -52,19 +49,41 @@ int prevEncoderVal;
 
 void DisplayVLC() {
   // For testing purposes -----------------------------
-//  currentVLCValues.title = "Big Iron";
-//  currentVLCValues.artist = "Marty Robbins";
-//  currentVLCValues.album = "Gunfighter Ballads and Trail Songs";
-//  currentVLCValues.trackLength = 236;
-//  currentVLCValues.playbackPos = 97;
-//  currentVLCValues.volume = 75;
-  currentVLCValues.repeatMode = ALL;
-  currentVLCValues.shuffle = true;
+  //  currentVLCValues.title = "Big Iron";
+  //  currentVLCValues.artist = "Marty Robbins";
+  //  currentVLCValues.album = "Gunfighter Ballads and Trail Songs";
+  //  currentVLCValues.trackLength = 236;
+  //  currentVLCValues.playbackPos = 97;
+  //  currentVLCValues.volume = 75;
+  //  currentVLCValues.repeatMode = ALL;
+  //  currentVLCValues.shuffle = true;
   // End example values -------------------------------
 
-  // Find difference in encoder value
+  // Find difference in encoder value, send as change in volume
   int encoderValue = enc.read();
   int encoderDifference = prevEncoderVal - encoderValue;
+  if (encoderDifference != 0)
+  {
+    Serial.println("VOLCHANGE(" + (String)encoderDifference + ")");
+  }
+  prevEncoderVal = encoderValue;
+
+  // Detect new button presses and send appropriate command
+  if (btnA.wasPressed()) {
+    Serial.println("PREV()");
+  }
+  if (btnB.wasPressed()) {
+    Serial.println("REPEAT()");
+  }
+  if (btnC.wasPressed()) {
+    Serial.println("SHUFFLE()");
+  }
+  if (btnD.wasPressed()) {
+    Serial.println("NEXT()");
+  }
+  if (btnENC.wasPressed()) {
+    Serial.println("PAUSE()");
+  }
 
   // Reset font positioning
   lcd.setFontPosBaseline();
@@ -75,7 +94,7 @@ void DisplayVLC() {
   // Print title
   PrintTitle();
   // Print either artist or album
-  if (!DISPLAY_ALBUM) {
+  if (!deviceOptions.displayAlbum) {
     PrintArtist();
   } else {
     PrintAlbum();
@@ -95,21 +114,38 @@ void DisplayVLC() {
 }
 
 void PrintTitle() {
+  // Temp
   lcd.setFont(TITLE_FONT);
-  lcd.setCursor(TITLE_X, TITLE_Y);
-  lcd.print(currentVLCValues.title);
+  ScrollText(currentVLCValues.title, TITLE_Y);
 }
 
 void PrintArtist() {
   lcd.setFont(ARTIST_FONT);
-  lcd.setCursor(ARTIST_X, ARTIST_Y);
-  lcd.print(currentVLCValues.artist);
+  ScrollText(currentVLCValues.artist, ARTIST_Y);
 }
 
 void PrintAlbum() {
   lcd.setFont(ALBUM_FONT);
-  lcd.setCursor(ALBUM_X, ALBUM_Y);
-  lcd.print(currentVLCValues.album);
+  ScrollText(currentVLCValues.album, ALBUM_Y);
+}
+
+void ScrollText(String text, int yPos) {
+  // Convert String into char array
+  int arrayLength = text.length() + 1;
+  char charArray[arrayLength];
+  text.toCharArray(charArray, arrayLength);
+
+  // Find the width of the text, and amount of excess
+  int strWidth = lcd.getStrWidth(charArray) + 2;
+  int excess = strWidth - WIDTH;
+  // If scrolling strings is enabled and it is longer than one width
+  if ((excess > 0) && deviceOptions.stringScroll) {
+      int offset = (0.5f * excess * cos((float)millis() / ((float)50 * excess))) - (0.5f * excess);
+      lcd.drawUTF8(offset, yPos, charArray);
+  } else {
+    // Draw normally
+    lcd.drawUTF8(0, yPos, charArray);
+  }
 }
 
 void PrintVolume() {
@@ -131,22 +167,30 @@ void PrintVolume() {
   lcd.setFont(VOLUME_FONT);
 
   // Prints value
-  lcd.setCursor((VOLUME_X + 9), VOLUME_Y);
+  lcd.setCursor((VOLUME_X + 11), VOLUME_Y);
   lcd.print(currentVLCValues.volume);
 }
 
 void PrintRepeat() {
   unsigned int repeatIcon;
+  bool print1 = false;
   switch (currentVLCValues.repeatMode) {
-ALL:
+    case OFF:
+      repeatIcon = 0x00;
+      break;
+    case ALL:
       repeatIcon = 0x56;
       break;
-ONE:
+    case ONE:
       repeatIcon = 0x56; // Replace later
+      print1 = true;
       break;
   }
   lcd.setFont(iconic_arrow8);
   lcd.drawGlyph(REPEAT_X, REPEAT_Y, repeatIcon);
+  if (print1) {
+    lcd.drawVLine(REPEAT_X + 9, REPEAT_Y - 1, 3);
+  }
 }
 
 void PrintShuffle() {

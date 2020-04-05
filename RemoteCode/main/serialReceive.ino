@@ -73,7 +73,6 @@ void VLCCommands(String identifier, String parameters[]) {
   // Nothing yet
   if (identifier == "TIME") {
     currentVLCValues.playbackPos = parameters[0].toInt();
-    //Serial.println("process" + (millis() - receivedMillis));
   }
   else if (identifier == "STATUS") {
     currentVLCValues.playbackStatus = (VLCPlaybackStatus)parameters[0].toInt();
@@ -92,6 +91,13 @@ void VLCCommands(String identifier, String parameters[]) {
   }
   else if (identifier == "LENGTH") {
     currentVLCValues.trackLength = parameters[0].toInt();
+  }
+  else if (identifier == "SHUFFLE") {
+    if (parameters[0] == "on") { currentVLCValues.shuffle = true; }
+    else { currentVLCValues.shuffle = false; }
+  }
+  else if (identifier == "REPEATMODE") {
+    currentVLCValues.repeatMode = (VLCRepeatMode)(parameters[0].toInt());
   }
 }
 

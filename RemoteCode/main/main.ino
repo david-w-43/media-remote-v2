@@ -61,7 +61,7 @@ Button btnD(BTN_D);
 Button btnENC(ENC_SW);
 
 // Defines rotary encoder, pins 2 and 3
-Encoder enc(ENC2, ENC1);
+Encoder enc(ENC1, ENC2);
 
 // Constants ------------------------------------------------------------------------------
 // Toggles frame debug information display (frame interval and flash)
@@ -69,7 +69,7 @@ Encoder enc(ENC2, ENC1);
 #define ENABLE_DISPLAY_FRAME_DEBUG false
 
 // Serial baud rate
-#define BAUD_RATE 9600
+#define BAUD_RATE 19200
 
 // Display dimensions
 #define HEIGHT 64
@@ -83,6 +83,12 @@ Encoder enc(ENC2, ENC1);
 
 // Enumerators
 enum DeviceMode { CLOCK, VLC, MEDIA, MENU };
+
+// Options
+struct DeviceOptions {
+  bool stringScroll;
+  bool displayAlbum;
+};
 
 // Shorthand font definitions -------------------------------------------------------------
 
@@ -105,6 +111,8 @@ const uint8_t* helv12R = u8g2_font_helvR12_tf;
 const uint8_t* helv14R = u8g2_font_helvR14_tf;
 const uint8_t* helv18R = u8g2_font_helvR18_tf;
 const uint8_t* helv24R = u8g2_font_helvR24_tf;
+
+const uint8_t* helv8RN = u8g2_font_helvR08_tn;
 
 const uint8_t* helv8B = u8g2_font_helvB08_tf;
 const uint8_t* helv10B = u8g2_font_helvB10_tf;
@@ -129,6 +137,8 @@ unsigned long prevTempMillis;
 unsigned long receivedMillis;
 
 unsigned int backlightLevel;
+
+DeviceOptions deviceOptions;
 
 // Setup ----------------------------------------------------------------------------------
 void setup() {
@@ -156,6 +166,10 @@ void setup() {
   Serial.println("REQUESTACCEPTED");
 
   temperatureStr = GetTemperatureStr();
+
+  // Read device options from EEPROM
+  deviceOptions.stringScroll = true;
+  deviceOptions.displayAlbum = false;
 
   // Starts communication with LCD
   delay(200);
