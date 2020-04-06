@@ -75,7 +75,7 @@ namespace CompanionApplication.VLC.Networking
 
             while (!outputCompleteFlag)
             {
-                if ((streamReader.EndOfStream) || (streamReader.Peek() == ">"[0]))
+                if ((streamReader.EndOfStream) || (streamReader.Peek() == '>'))
                 {
                     outputCompleteFlag = true;
                     streamReader.DiscardBufferedData();

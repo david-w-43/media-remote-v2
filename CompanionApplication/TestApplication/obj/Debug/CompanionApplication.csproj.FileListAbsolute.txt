@@ -22,3 +22,4 @@ D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\bin\De
 D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.Properties.Resources.resources
 D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.exe
 D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.pdb
+D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.Settings.resources

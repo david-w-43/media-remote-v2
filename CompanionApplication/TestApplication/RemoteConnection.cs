@@ -181,5 +181,25 @@ namespace CompanionApplication
                 }
             }
         }
+
+
+        /// <summary>
+        /// Updates settings of remote
+        /// </summary>
+        public void UpdateRemote()
+        {
+            // Shorthand settings
+            var settings = Properties.Settings.Default;
+
+            // Send scroll long text bool
+            int val;
+            if (settings.ScrollLongText) { val = 1; } else { val = 0; }
+            Send("UPDSCROLL(" + val + ")");
+
+            // Send display album bool
+            if (settings.DisplayAlbum) { val = 1; } else { val = 0; }
+            Send("UPDALBUM(" + val + ")");
+        }
+
     }
 }

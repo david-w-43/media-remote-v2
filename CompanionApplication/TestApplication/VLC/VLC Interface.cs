@@ -81,6 +81,8 @@ namespace CompanionApplication.VLC
             
         }
 
+
+        private bool filepathFound, titleFound, stateFound, artistFound, albumFound, volumeFound, lengthFound = false;
         /// <summary>
         /// Updates information about current track and playback
         /// </summary>
@@ -88,12 +90,17 @@ namespace CompanionApplication.VLC
         /// <param name="e"></param>
         private void UpdateInformation(object sender, System.Timers.ElapsedEventArgs e)
         {
+            // Variables to keep track of which values have been found
+            
+
             // List of commands to send to remote
             List<string> toSend = new List<string>();
 
             // Gets filepath, volume and playback status
             client.SendLine("status");
             List<string> received = client.ReadLines();
+
+            filepathFound = stateFound = volumeFound = false;
 
             foreach (string line in received)
             {
@@ -102,26 +109,28 @@ namespace CompanionApplication.VLC
                 {
                     // Parse filepath
                     //Console.WriteLine(line);
-                    int start = line.IndexOf(":"[0]) + 2;
+                    int start = line.IndexOf(':') + 2;
                     int end = line.LastIndexOf(" )");
                     currentValues.filepath = line.Substring(start, end - start);
+                    filepathFound = true;
                     //Console.WriteLine(currentValues.filepath);
                 } else if (line.Contains("audio volume"))
                 {
                     // Parse volume
                     //Console.WriteLine(line);
-                    int start = line.IndexOf(":"[0]) + 2;
+                    int start = line.IndexOf(':') + 2;
                     int end = line.LastIndexOf(" )");
                     string substring = line.Substring(start, end - start);
                     //Console.WriteLine(substring);
                     int.TryParse(substring, out int volume);
                     currentValues.volume = MapTo100(volume);
+                    volumeFound = true;
                     //Console.WriteLine(currentValues.volume);
                 } else if (line.Contains("state"))
                 {
                     // Parse play status
                     //Console.WriteLine(line);
-                    int start = line.IndexOf(" "[0]);
+                    int start = line.IndexOf(' ');
                     int end = line.LastIndexOf(" )");
                     string parsed = line.Substring(start, end - start);
                     switch (parsed)
@@ -138,6 +147,7 @@ namespace CompanionApplication.VLC
                         default:
                             break;
                     }
+                    stateFound = true;
                     //Console.WriteLine(currentValues.volume);
                 }
             }
@@ -154,8 +164,10 @@ namespace CompanionApplication.VLC
             }
 
             // Checks if the track is new
-            if (!Equals(currentValues.filepath, prevValues.filepath))
+            if (!Equals(currentValues.filepath, prevValues.filepath) || !lengthFound)
             {
+                artistFound = albumFound = titleFound = lengthFound = false;
+
                 // Request track metadata
                 client.SendLine("info");
                 received = client.ReadLines();
@@ -165,22 +177,25 @@ namespace CompanionApplication.VLC
                     if (line.StartsWith("| artist:"))
                     {
                         // Parse artist
-                        int start = line.IndexOf(":"[0]) + 2;
+                        int start = line.IndexOf(':') + 2;
                         currentValues.artist = line.Substring(start);
+                        artistFound = true;
                     }
                     else if (line.StartsWith("| album:"))
                     {
                         // Parse album
-                        int start = line.IndexOf(":"[0]) + 2;
+                        int start = line.IndexOf(':') + 2;
                         currentValues.album = line.Substring(start);
+                        albumFound = true;
                     }
                     else if (line.StartsWith("| title:"))
                     {
                         // Parse title
-                        int start = line.IndexOf(":"[0]) + 2;
+                        int start = line.IndexOf(':') + 2;
                         currentValues.title = line.Substring(start);
+                        titleFound = true;
                     }
-                }
+                } 
 
                 // Get track length
                 client.SendLine("get_length");
@@ -190,17 +205,26 @@ namespace CompanionApplication.VLC
                     //Console.WriteLine(line);
                     string trimmed = line.Trim();
                     if (int.TryParse(line, out int parsed)) { currentValues.trackLength = parsed; }
+                    lengthFound = true;
                 }
 
+                // If values not found, substitute
+                if (!titleFound) { currentValues.title = currentValues.filepath.Split('/').Last(); } // File name
+                if (!artistFound) { currentValues.artist = "Unknown Artist"; }
+                if (!albumFound) { currentValues.album = "Unknown Album"; }
+
+                // Shorthand for settings
+                var settings = Properties.Settings.Default;
+
                 // If changed, add to list of commands to send
-                if (currentValues.title != prevValues.title) { toSend.Add("TITLE(" + currentValues.title + ")"); }
-                if (currentValues.artist != prevValues.artist) { toSend.Add("ARTIST(" + currentValues.artist + ")"); }
-                if (currentValues.trackLength != prevValues.trackLength) { toSend.Add("LENGTH(" + currentValues.trackLength + ")"); }
-                if (currentValues.album != prevValues.album) { toSend.Add("ALBUM(" + currentValues.album + ")"); }
+                if ((currentValues.title != prevValues.title) || !titleFound) { toSend.Add("TITLE(" + currentValues.title + ")"); }
+                if (((currentValues.artist != prevValues.artist) || !artistFound) &&  !settings.DisplayAlbum) { toSend.Add("ARTIST(" + currentValues.artist + ")"); }
+                if ((currentValues.trackLength != prevValues.trackLength) || !lengthFound ) { toSend.Add("LENGTH(" + currentValues.trackLength + ")"); }
+                if (((currentValues.album != prevValues.album) || !albumFound) && settings.DisplayAlbum) { toSend.Add("ALBUM(" + currentValues.album + ")"); }
             }
 
             // Send updated data to remote
-            if (currentValues.volume != prevValues.volume) { toSend.Add("VOLUME(" + currentValues.volume + ")"); }
+            if ((currentValues.volume != prevValues.volume) || !volumeFound) { toSend.Add("VOLUME(" + currentValues.volume + ")"); }
             if (currentValues.playStatus != prevValues.playStatus) { toSend.Add("STATUS(" + currentValues.playStatus + ")"); }
             if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add("TIME(" + currentValues.playbackPos + ")"); }
 

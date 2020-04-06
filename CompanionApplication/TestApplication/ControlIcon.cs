@@ -24,7 +24,10 @@ namespace CompanionApplication
             {
                 Icon = Properties.Resources.display,
                 ContextMenu = new ContextMenu(new MenuItem[] {
-                new MenuItem("Exit", Exit)
+                
+                new MenuItem("Settings", OpenSettings), // Opens the settings form
+                new MenuItem("-"), // Separator
+                new MenuItem("Exit", Exit), // Exits application
             }),
                 Visible = true
             };
@@ -44,6 +47,18 @@ namespace CompanionApplication
             trayIcon.Visible = false;
 
             Application.Exit();
+        }
+
+        void OpenSettings(object sender, EventArgs e)
+        {
+            Settings settingsForm = new Settings();
+            DialogResult result = settingsForm.ShowDialog();
+            // If user pressed OK
+            if (result == DialogResult.OK)
+            {
+                // Update remote with relevant settings
+                connection.UpdateRemote();
+            }
         }
     }
 }

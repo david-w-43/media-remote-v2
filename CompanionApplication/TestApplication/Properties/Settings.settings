@@ -14,5 +14,11 @@
     <Setting Name="VLCPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\Program Files (x86)\VideoLAN\VLC\vlc.exe</Value>
     </Setting>
+    <Setting Name="DisplayAlbum" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ScrollLongText" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

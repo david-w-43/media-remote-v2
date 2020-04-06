@@ -70,5 +70,29 @@ namespace CompanionApplication.Properties {
                 this["VLCPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DisplayAlbum {
+            get {
+                return ((bool)(this["DisplayAlbum"]));
+            }
+            set {
+                this["DisplayAlbum"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ScrollLongText {
+            get {
+                return ((bool)(this["ScrollLongText"]));
+            }
+            set {
+                this["ScrollLongText"] = value;
+            }
+        }
     }
 }
