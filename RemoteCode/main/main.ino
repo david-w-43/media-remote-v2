@@ -1,3 +1,6 @@
+// Permanent storage
+#include <EEPROM.h>
+
 // Simplifies buttons
 #include <JC_Button.h>
 
@@ -81,6 +84,9 @@ Encoder enc(ENC1, ENC2);
 // If pin is held down for this many milliseconds, it is considered a long press
 #define LONG_PRESS 500
 
+// EEPROM locations
+#define EEPROM_OPTIONS 0
+
 // Enumerators
 enum DeviceMode { CLOCK, VLC, MEDIA, MENU };
 
@@ -88,6 +94,8 @@ enum DeviceMode { CLOCK, VLC, MEDIA, MENU };
 struct DeviceOptions {
   bool stringScroll;
   bool displayAlbum;
+  int brightness;
+  int contrast;
 };
 
 // Shorthand font definitions -------------------------------------------------------------
@@ -155,9 +163,6 @@ void setup() {
   // Connects to DS18B20
   sensors.begin();
 
-  backlightLevel = 32;
-  SetBacklight(backlightLevel);
-
   // Sets temperature resolution to 9 bits for faster access speed
   sensors.setResolution(tempSensor, READING_RESOLUTION);
 
@@ -168,8 +173,8 @@ void setup() {
   temperatureStr = GetTemperatureStr();
 
   // Read device options from EEPROM
-  deviceOptions.stringScroll = true;
-  deviceOptions.displayAlbum = false;
+  EEPROM.get(EEPROM_OPTIONS, deviceOptions);
+  SetBacklight(deviceOptions.brightness);
 
   // Starts communication with LCD
   delay(200);
@@ -369,4 +374,10 @@ int GetFrameInterval() {
 void SetBacklight(int level) {
   analogWrite(LCD_BACKLIGHT, level);
   //digitalWrite(LCD_BACKLIGHT, HIGH);
+}
+
+// SetContrast -------------------------------------------------------------------------
+// Sets contrast level
+void SetContrast(int level) {
+  
 }

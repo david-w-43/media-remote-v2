@@ -209,7 +209,12 @@ void PrintBar() {
   String posStr = secondsToTimeStr(currentVLCValues.playbackPos);
   String lengthStr = secondsToTimeStr(currentVLCValues.trackLength);
 
-  int posWidth = lcd.getStrWidth(posStr.c_str());
+  // posWidth should be fixed for a set number of characters
+  int posWidth = 0;
+  if (posStr.length() == 5) { posWidth = lcd.getUTF8Width("00:00"); }
+  else if (posStr.length() == 7) { posWidth = lcd.getUTF8Width("0:00:00"); }
+  else if (posStr.length() == 8) { posWidth = lcd.getUTF8Width("00:00:00"); }
+  //int posWidth = lcd.getStrWidth(posStr.c_str());
   int lengthWidth = lcd.getStrWidth(lengthStr.c_str());
 
   // Print current position
@@ -220,8 +225,8 @@ void PrintBar() {
   lcd.print(lengthStr);
 
   // Draw bar
-  int barStart = posWidth + 1 + MARKER_RADIUS;
-  int barEnd = WIDTH - (lengthWidth + 1 + MARKER_RADIUS);
+  int barStart = posWidth + 2 + MARKER_RADIUS;
+  int barEnd = WIDTH - (lengthWidth + 2 + MARKER_RADIUS);
   int barLength = barEnd - barStart;
 
   lcd.drawHLine(barStart, BAR_Y, barLength);

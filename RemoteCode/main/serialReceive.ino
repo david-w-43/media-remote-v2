@@ -3,7 +3,7 @@ void serialEvent() {
   Serial.flush(); // Wait for outgoing data to transmit
 
   //Serial.println("Data received");
-  
+
   // String receivedString = "";
   // While there are bytes available to read, read data into string
   while (Serial.available() > 0) {
@@ -45,6 +45,40 @@ void serialEvent() {
     } else if (identifier == "MODEQUERY") {
       // Report the current device mode
       Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
+    }
+
+    // Commands that update device settings
+    if (identifier.startsWith("UPD")) {
+      if (identifier == "UPDSCROLL") {
+        // Scrolling of long strings
+        if (parameters[0] == "0") {
+          deviceOptions.stringScroll = false;
+        } else {
+          deviceOptions.stringScroll = true;
+        }
+      } else if (identifier == "UPDALBUM") {
+        // Display of album over artist
+        if (parameters[0] == "0") {
+          deviceOptions.displayAlbum = false;
+        }
+        else
+        {
+          deviceOptions.displayAlbum = true;
+        }
+      }
+      else if (identifier == "UPDBRIGHT") {
+        int level = parameters[0].toInt()
+        deviceOptions.brightness = level;
+        SetBacklight(level);
+      }
+      else if (identifier == "UPDCONT") {
+        int level = parameters[0].toInt();
+        deviceOptions.contrast = level;
+        SetContrast(level);
+      }
+
+      // Update EEPROM
+      EEPROM.put(EEPROM_OPTIONS, deviceOptions);
     }
 
     // Commands that depend on mode
@@ -93,8 +127,12 @@ void VLCCommands(String identifier, String parameters[]) {
     currentVLCValues.trackLength = parameters[0].toInt();
   }
   else if (identifier == "SHUFFLE") {
-    if (parameters[0] == "on") { currentVLCValues.shuffle = true; }
-    else { currentVLCValues.shuffle = false; }
+    if (parameters[0] == "on") {
+      currentVLCValues.shuffle = true;
+    }
+    else {
+      currentVLCValues.shuffle = false;
+    }
   }
   else if (identifier == "REPEATMODE") {
     currentVLCValues.repeatMode = (VLCRepeatMode)(parameters[0].toInt());
