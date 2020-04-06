@@ -25,7 +25,7 @@ namespace CompanionApplication.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("COM7")]
         public string connectedPortName {
             get {
                 return ((string)(this["connectedPortName"]));
@@ -56,6 +56,18 @@ namespace CompanionApplication.Properties {
             }
             set {
                 this["TCPPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe")]
+        public string VLCPath {
+            get {
+                return ((string)(this["VLCPath"]));
+            }
+            set {
+                this["VLCPath"] = value;
             }
         }
     }

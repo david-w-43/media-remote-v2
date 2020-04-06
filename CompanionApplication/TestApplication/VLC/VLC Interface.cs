@@ -48,26 +48,37 @@ namespace CompanionApplication.VLC
         /// <param name="remoteConnection">Serial connection to remote</param>
         public Interface(ref RemoteConnection remoteConnection)
         {
-            // Initialise TCP client
-            client = new Networking.Client();
+            try
+            {
+                // Initialise TCP client
+                client = new Networking.Client();
 
-            this.remoteConnection = remoteConnection;
+                this.remoteConnection = remoteConnection;
 
-            // Grab settings
-            string hostname = Properties.Settings.Default.TCPHostname;
-            int port = Properties.Settings.Default.TCPPort;
+                // Grab settings
+                string hostname = Properties.Settings.Default.TCPHostname;
+                int port = Properties.Settings.Default.TCPPort;
 
-            // Connect to socket
-            client.ConnectToServer(hostname, port);
+                // Connect to socket
+                client.ConnectToServer(hostname, port);
 
-            // Initialise values, these cannot be read from VLC console
-            Shuffle(false);
-            Repeat(RepeatMode.off);
-            System.Threading.Thread.Sleep(50);
+                // Initialise values, these cannot be read from VLC console
+                Shuffle(false);
+                Repeat(RepeatMode.off);
+                System.Threading.Thread.Sleep(50);
 
-            // Start timer to update metadata
-            updateTimer.Elapsed += UpdateInformation;
-            updateTimer.Start();
+                // Start timer to update metadata
+                updateTimer.Elapsed += UpdateInformation;
+                updateTimer.Start();
+            }
+            catch (System.Net.Sockets.SocketException)
+            {
+                var settings = Properties.Settings.Default;
+                string arguments = "--cli-host=\"" + settings.TCPHostname + ":" + settings.TCPPort + "\"";
+                System.Diagnostics.Process.Start(Properties.Settings.Default.VLCPath, arguments);
+                throw;
+            }
+            
         }
 
         /// <summary>

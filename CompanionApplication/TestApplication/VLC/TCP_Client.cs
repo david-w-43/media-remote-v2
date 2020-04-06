@@ -46,17 +46,21 @@ namespace CompanionApplication.VLC.Networking
         /// <param name="port">The port the server is listening on</param>
         public void ConnectToServer(string ipAddress, int port)
         {
-            this.port = port;
+            try
+            {
+                this.port = port;
 
-            tcpClient = new TcpClient(ipAddress, port);
-            clientStream = tcpClient.GetStream();
-            streamReader = new StreamReader(tcpClient.GetStream(), Encoding.UTF8);
+                tcpClient = new TcpClient(ipAddress, port);
+                clientStream = tcpClient.GetStream();
+                streamReader = new StreamReader(tcpClient.GetStream(), Encoding.UTF8);
 
-            Console.WriteLine("Connected to server, listening for packets");
-
-            //Thread t = new Thread(new ThreadStart(ListenForPackets));
-            //started = true;
-            //t.Start();
+                Console.WriteLine("Connected to server, listening for packets");
+            }
+            catch (SocketException)
+            {
+                Console.WriteLine("Socket exception on " + ipAddress + ":" + port);
+                throw;
+            }
         }
 
         /// <summary>

@@ -43,7 +43,20 @@ namespace CompanionApplication
                     break;
                 case DeviceMode.VLC:
                     Console.WriteLine("VLC mode");
-                    vlcInterface = new VLC.Interface(ref remoteConnection);
+
+                    // Make three attempts at a connection
+                    int i = 0;
+                    while (Equals(vlcInterface, null) && i < 3 )
+                    {
+                        try
+                        {
+                            vlcInterface = new VLC.Interface(ref remoteConnection);
+                        }
+                        catch (System.Net.Sockets.SocketException)
+                        {
+                            i++;
+                        }
+                    }
                     break;
                 case DeviceMode.MEDIA:
                     Console.WriteLine("Media mode");
