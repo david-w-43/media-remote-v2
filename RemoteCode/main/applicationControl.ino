@@ -19,44 +19,41 @@ const uint8_t* VOLUME_FONT = helv8R;
 #define SHUFFLE_Y 45
 
 #define REPEAT_X 64
-#define REPEAT_Y 45
+#define REPEAT_Y 45                           
 
 #define BAR_Y 55
 #define MARKER_RADIUS 2
 const uint8_t* BAR_FONT = helv8RN;
 
 // Repeat mode enumerator
-enum VLCRepeatMode { OFF, ALL, ONE };
-enum VLCPlaybackStatus { PLAYING, PAUSED, STOPPED };
+enum RepeatMode { OFF, ALL, ONE };
+enum PlaybackStatus { PLAYING, PAUSED, STOPPED };
 
-// VLC values structure
-struct VLCValues {
+// Values structure
+struct Values {
   String title;
   String artist;
   String album;
   unsigned int trackLength;
   unsigned int playbackPos;
   unsigned int volume;
-  VLCRepeatMode repeatMode;
-  VLCPlaybackStatus playbackStatus;
+  RepeatMode repeatMode;
+  PlaybackStatus playbackStatus;
   bool shuffle;
 };
 
-VLCValues currentVLCValues;
+Values currentValues;
 
-// Stores the previous encoder value so that the change may be found
-int prevEncoderVal;
-
-void DisplayVLC() {
+void DisplayApplicationControl() {
   // For testing purposes -----------------------------
-  //  currentVLCValues.title = "Big Iron";
-  //  currentVLCValues.artist = "Marty Robbins";
-  //  currentVLCValues.album = "Gunfighter Ballads and Trail Songs";
-  //  currentVLCValues.trackLength = 236;
-  //  currentVLCValues.playbackPos = 97;
-  //  currentVLCValues.volume = 75;
-  //  currentVLCValues.repeatMode = ALL;
-  //  currentVLCValues.shuffle = true;
+  //  currentValues.title = "Big Iron";
+  //  currentValues.artist = "Marty Robbins";
+  //  currentValues.album = "Gunfighter Ballads and Trail Songs";
+  //  currentValues.trackLength = 236;
+  //  currentValues.playbackPos = 97;
+  //  currentValues.volume = 75;
+  //  currentValues.repeatMode = ALL;
+  //  currentValues.shuffle = true;
   // End example values -------------------------------
 
   // Find difference in encoder value, send as change in volume
@@ -116,17 +113,17 @@ void DisplayVLC() {
 void PrintTitle() {
   // Temp
   lcd.setFont(TITLE_FONT);
-  ScrollText(currentVLCValues.title, TITLE_Y);
+  ScrollText(currentValues.title, TITLE_Y);
 }
 
 void PrintArtist() {
   lcd.setFont(ARTIST_FONT);
-  ScrollText(currentVLCValues.artist, ARTIST_Y);
+  ScrollText(currentValues.artist, ARTIST_Y);
 }
 
 void PrintAlbum() {
   lcd.setFont(ALBUM_FONT);
-  ScrollText(currentVLCValues.album, ALBUM_Y);
+  ScrollText(currentValues.album, ALBUM_Y);
 }
 
 void ScrollText(String text, int yPos) {
@@ -153,10 +150,10 @@ void PrintVolume() {
   unsigned int volumeIcon;
 
   // Selects icon depending on volume
-  if (currentVLCValues.volume < 33) {
+  if (currentValues.volume < 33) {
     volumeIcon = 0x51;
   }
-  else if (currentVLCValues.volume < 67) {
+  else if (currentValues.volume < 67) {
     volumeIcon = 0x50;
   }
   else {
@@ -168,13 +165,13 @@ void PrintVolume() {
 
   // Prints value
   lcd.setCursor((VOLUME_X + 11), VOLUME_Y);
-  lcd.print(currentVLCValues.volume);
+  lcd.print(currentValues.volume);
 }
 
 void PrintRepeat() {
   unsigned int repeatIcon;
   bool print1 = false;
-  switch (currentVLCValues.repeatMode) {
+  switch (currentValues.repeatMode) {
     case OFF:
       repeatIcon = 0x00;
       break;
@@ -195,7 +192,7 @@ void PrintRepeat() {
 
 void PrintShuffle() {
   lcd.setFont(iconic_arrow8);
-  if (currentVLCValues.shuffle) {
+  if (currentValues.shuffle) {
     lcd.drawGlyph(SHUFFLE_X, SHUFFLE_Y, 0x59);
   }
 }
@@ -206,8 +203,8 @@ void PrintBar() {
   lcd.setFont(BAR_FONT);
 
   // Get times as char arrays
-  String posStr = secondsToTimeStr(currentVLCValues.playbackPos);
-  String lengthStr = secondsToTimeStr(currentVLCValues.trackLength);
+  String posStr = secondsToTimeStr(currentValues.playbackPos);
+  String lengthStr = secondsToTimeStr(currentValues.trackLength);
 
   // posWidth should be fixed for a set number of characters
   int posWidth = 0;
@@ -233,7 +230,7 @@ void PrintBar() {
 
   // Draw marker on bar
   // Calculate position of marker along bar
-  float fracProgress =  (float)currentVLCValues.playbackPos / (float)currentVLCValues.trackLength;
+  float fracProgress =  (float)currentValues.playbackPos / (float)currentValues.trackLength;
   int markerPos = (int)(fracProgress * barLength);
   lcd.drawDisc(markerPos + barStart, BAR_Y, MARKER_RADIUS);
 

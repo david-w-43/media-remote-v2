@@ -45,7 +45,7 @@
 
 // Object definitions ---------------------------------------------------------------------
 
-// LCD constructor (rotation, clock, data, chip select, reset)
+// LCD constructor (rotation, Clock, data, chip select, reset)
 // Using full frame buffer
 U8G2_ST7920_128X64_F_SW_SPI lcd(U8G2_R2, LCD_E, LCD_RW, LCD_RS, LCD_RESET);
 
@@ -88,14 +88,13 @@ Encoder enc(ENC1, ENC2);
 #define EEPROM_OPTIONS 0
 
 // Enumerators
-enum DeviceMode { CLOCK, VLC, MEDIA, MENU };
+enum DeviceMode { Clock, ApplicationControl, SystemMedia, Menu };
 
 // Options
 struct DeviceOptions {
   bool stringScroll;
   bool displayAlbum;
   int brightness;
-  int contrast;
 };
 
 // Shorthand font definitions -------------------------------------------------------------
@@ -134,8 +133,8 @@ const uint8_t* iconic_arrow8 = u8g2_font_open_iconic_arrow_1x_t;
 
 // Global variables -----------------------------------------------------------------------
 
-// Device mode, CLOCK by default
-DeviceMode deviceMode = CLOCK;
+// Device mode, Clock by default
+DeviceMode deviceMode = Clock;
 
 // Stores temperature in celsius, 1 decimal place with unit, as string
 String temperatureStr;
@@ -147,6 +146,9 @@ unsigned long receivedMillis;
 unsigned int backlightLevel;
 
 DeviceOptions deviceOptions;
+
+// Stores the previous encoder value so that the change may be found
+int prevEncoderVal;
 
 // Setup ----------------------------------------------------------------------------------
 void setup() {
@@ -184,7 +186,7 @@ void setup() {
 
   lcd.clearBuffer();
   lcd.setFont(profont17);
-  lcd.drawStr(0, 20, "Media Remote");
+  lcd.drawStr(0, 20, "SystemMedia Remote");
   lcd.drawStr(0, 36, "V2");
   lcd.setFont(profont12);
   lcd.drawStr(0, 60, "A second attempt");
@@ -259,16 +261,16 @@ void loop() {
 
   // Behaviour depends on the current mode
   switch (deviceMode) {
-    case CLOCK:
+    case Clock:
       DisplayClock();
       break;
-    case VLC:
-      DisplayVLC();
+    case ApplicationControl:
+      DisplayApplicationControl();
       break;
-    case MEDIA:
-      DisplayMedia();
+    case SystemMedia:
+      DisplaySystemMedia();
       break;
-    case MENU:
+    case Menu:
       DisplayMenu();
       break;
   }

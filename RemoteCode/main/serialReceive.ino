@@ -67,14 +67,9 @@ void serialEvent() {
         }
       }
       else if (identifier == "UPDBRIGHT") {
-        int level = parameters[0].toInt()
+        int level = parameters[0].toInt();
         deviceOptions.brightness = level;
         SetBacklight(level);
-      }
-      else if (identifier == "UPDCONT") {
-        int level = parameters[0].toInt();
-        deviceOptions.contrast = level;
-        SetContrast(level);
       }
 
       // Update EEPROM
@@ -83,16 +78,16 @@ void serialEvent() {
 
     // Commands that depend on mode
     switch (deviceMode) {
-      case CLOCK:
+      case Clock:
         ClockCommands(identifier, parameters);
         break;
-      case VLC:
-        VLCCommands(identifier, parameters);
+      case ApplicationControl:
+        ApplicationControlCommands(identifier, parameters);
         break;
-      case MEDIA:
-        MediaCommands(identifier, parameters);
+      case SystemMedia:
+        SystemMediaCommands(identifier, parameters);
         break;
-      case MENU:
+      case Menu:
         MenuCommands(identifier, parameters);
         break;
     }
@@ -103,43 +98,43 @@ void ClockCommands(String identifier, String parameters[]) {
   // Nothing yet
 }
 
-void VLCCommands(String identifier, String parameters[]) {
+void ApplicationControlCommands(String identifier, String parameters[]) {
   // Nothing yet
   if (identifier == "TIME") {
-    currentVLCValues.playbackPos = parameters[0].toInt();
+    currentValues.playbackPos = parameters[0].toInt();
   }
   else if (identifier == "STATUS") {
-    currentVLCValues.playbackStatus = (VLCPlaybackStatus)parameters[0].toInt();
+    currentValues.playbackStatus = (PlaybackStatus)parameters[0].toInt();
   }
   else if (identifier == "VOLUME") {
-    currentVLCValues.volume = parameters[0].toInt();
+    currentValues.volume = parameters[0].toInt();
   }
   else if (identifier == "TITLE") {
-    currentVLCValues.title = parameters[0];
+    currentValues.title = parameters[0];
   }
   else if (identifier == "ARTIST") {
-    currentVLCValues.artist = parameters[0];
+    currentValues.artist = parameters[0];
   }
   else if (identifier == "ALBUM") {
-    currentVLCValues.album = parameters[0];
+    currentValues.album = parameters[0];
   }
   else if (identifier == "LENGTH") {
-    currentVLCValues.trackLength = parameters[0].toInt();
+    currentValues.trackLength = parameters[0].toInt();
   }
   else if (identifier == "SHUFFLE") {
     if (parameters[0] == "on") {
-      currentVLCValues.shuffle = true;
+      currentValues.shuffle = true;
     }
     else {
-      currentVLCValues.shuffle = false;
+      currentValues.shuffle = false;
     }
   }
   else if (identifier == "REPEATMODE") {
-    currentVLCValues.repeatMode = (VLCRepeatMode)(parameters[0].toInt());
+    currentValues.repeatMode = (RepeatMode)(parameters[0].toInt());
   }
 }
 
-void MediaCommands(String identifier, String parameters[]) {
+void SystemMediaCommands(String identifier, String parameters[]) {
   // Nothing yet
 }
 

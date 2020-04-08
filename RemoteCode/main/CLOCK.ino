@@ -1,4 +1,4 @@
-// Runs while in CLOCK mode
+// Runs while in Clock mode
 void DisplayClock() {
   // GetTimeStr();
   char timeStr[] = "18:16";
