@@ -4,43 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CompanionApplication.VLC
+namespace CompanionApplication.ApplicationMedia.VLC
 {
     /// <summary>
     /// Interface for VLC Media Player using TCP socket
     /// </summary>
-    public class Interface
+    class Interface : ApplicationInterface
     {
-        public enum RepeatMode { off, all, one };
-        // Play status
-        public enum PlayStatus { playing, paused, stopped };
-        private RemoteConnection remoteConnection;
-
-        /// <summary>
-        /// Stores the values relating to VLC
-        /// </summary>
-        public struct VLCValues
-        {
-            public string title;
-            public string artist;
-            public string album;
-            public int trackLength;
-            public int playbackPos;
-            public int volume; // 0 - 100
-            public RepeatMode repeatMode;
-            public bool shuffle;
-            public string filepath;
-            public PlayStatus playStatus;
-        };
-
-        private const int updateInterval = 100;
-
-        private VLCValues currentValues, prevValues;
-
         private Networking.Client client;
-
-        // Creates timer
-        private System.Timers.Timer updateTimer = new System.Timers.Timer { AutoReset = true, Interval = updateInterval };
 
         /// <summary>
         /// Initiates connection to TCP socket
@@ -88,11 +59,8 @@ namespace CompanionApplication.VLC
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void UpdateInformation(object sender, System.Timers.ElapsedEventArgs e)
+        protected override void UpdateInformation(object sender, System.Timers.ElapsedEventArgs e)
         {
-            // Variables to keep track of which values have been found
-            
-
             // List of commands to send to remote
             List<string> toSend = new List<string>();
 
@@ -228,18 +196,6 @@ namespace CompanionApplication.VLC
             if (currentValues.playStatus != prevValues.playStatus) { toSend.Add("STATUS(" + currentValues.playStatus + ")"); }
             if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add("TIME(" + currentValues.playbackPos + ")"); }
 
-            //// Write all data to console
-            //Console.WriteLine("------------------------");
-            //Console.WriteLine(currentValues.filepath);
-            //Console.WriteLine(currentValues.title);
-            //Console.WriteLine(currentValues.artist);
-            //Console.WriteLine(currentValues.album);
-            //Console.WriteLine(currentValues.trackLength);
-            //Console.WriteLine(currentValues.volume);
-            //Console.WriteLine(currentValues.playStatus);
-            //Console.WriteLine(currentValues.playbackPos);
-            //Console.WriteLine("------------------------");
-
             remoteConnection.Send(toSend);
 
             // Set previous values equal to current values
@@ -270,7 +226,7 @@ namespace CompanionApplication.VLC
         /// Changes volume by set amount
         /// </summary>
         /// <param name="change">Signed change in volume</param>
-        public void VolumeAdjust(int change)
+        public override void VolumeAdjust(int change)
         {
             currentValues.volume += change;
             if (currentValues.volume < 0) { currentValues.volume = 0; }
@@ -278,8 +234,8 @@ namespace CompanionApplication.VLC
             client.SendLine("volume " + MapTo256(currentValues.volume));
         }
 
-        public void Next() { client.SendLine("next"); }
-        public void Prev()
+        public override void Next() { client.SendLine("next"); }
+        public override void Prev()
         {
             // If at beginning of track, go to previous
             if (currentValues.playbackPos < 3)
@@ -291,12 +247,12 @@ namespace CompanionApplication.VLC
                 client.SendLine("seek 0");
             }
         }
-        public void Pause() { client.SendLine("pause"); }
+        public override void PlayPause() { client.SendLine("pause"); }
 
         /// <summary>
         /// Toggles shuffle mode
         /// </summary>
-        public void ShuffleToggle()
+        public override void ShuffleToggle()
         {
             // Toggle shuffle
             currentValues.shuffle = !currentValues.shuffle;
@@ -307,7 +263,7 @@ namespace CompanionApplication.VLC
         /// Sets shuffle mode 
         /// </summary>
         /// <param name="enabled"></param>
-        public void Shuffle(bool enabled)
+        public override void Shuffle(bool enabled)
         {
             currentValues.shuffle = enabled;
 
@@ -320,7 +276,7 @@ namespace CompanionApplication.VLC
         /// <summary>
         /// Increments the repeat mode and updates display and VLC
         /// </summary>
-        public void RepeatInc()
+        public override void RepeatInc()
         {
             // If not the last repeat mode
             if (currentValues.repeatMode != (RepeatMode)2)
@@ -339,7 +295,7 @@ namespace CompanionApplication.VLC
         /// Updates repeat mode
         /// </summary>
         /// <param name="mode"></param>
-        private void Repeat(RepeatMode mode)
+        public override void Repeat(RepeatMode mode)
         {
             // Update VLC
             switch (mode)
@@ -363,6 +319,12 @@ namespace CompanionApplication.VLC
 
             // Update display
             remoteConnection.Send("REPEATMODE(" + (int)currentValues.repeatMode + ")");
+        }
+
+        public override void Disconnect()
+        {
+            // Stop playback
+            client.SendLine("stop");
         }
     }
 }

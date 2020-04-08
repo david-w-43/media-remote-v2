@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace CompanionApplication.VLC.Networking
+namespace CompanionApplication.ApplicationMedia.VLC.Networking
 {
     /// <summary>
     /// Implements a simple TCP client which connects to a specified server

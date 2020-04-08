@@ -70,6 +70,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationMedia\ApplicationInterface.cs" />
+    <Compile Include="ApplicationMedia\iTunes\iTunesInterface.cs" />
     <Compile Include="CommandHandler.cs" />
     <Compile Include="ControlIcon.cs" />
     <Compile Include="Program.cs" />
@@ -82,8 +84,8 @@
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
     <Compile Include="SystemAudio.cs" />
-    <Compile Include="VLC\TCP_Client.cs" />
-    <Compile Include="VLC\VLC Interface.cs" />
+    <Compile Include="ApplicationMedia\VLC\TCPClient.cs" />
+    <Compile Include="ApplicationMedia\VLC\VLCInterface.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -126,6 +128,17 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="iTunesLib">
+      <Guid>{9E93C96F-CF0D-43F6-8BA8-B807A3370712}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>13</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

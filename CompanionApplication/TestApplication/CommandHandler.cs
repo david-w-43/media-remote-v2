@@ -3,22 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CompanionApplication.ApplicationMedia;
 
 namespace CompanionApplication
 {
-    public enum DeviceMode { CLOCK, VLC, MEDIA, MENU };
+    public enum DeviceMode { Clock, ApplicationControl, SystemMedia, Menu };
 
     public class CommandHandler
     {
         public const char separator = (char)0x7c;
-
-        // Commands that can be recieved
-        // Take the form
-        //      COMMAND (parameter1|parameter2|...|parameter3)
-
         
         public RemoteConnection remoteConnection;
-        private VLC.Interface vlcInterface;
+        private ApplicationInterface applicationInterface;
 
         private DeviceMode deviceMode;
 
@@ -38,30 +34,39 @@ namespace CompanionApplication
             deviceMode = mode;
             switch (mode)
             {
-                case DeviceMode.CLOCK:
+                case DeviceMode.Clock:
                     Console.WriteLine("Clock mode");
                     break;
-                case DeviceMode.VLC:
-                    Console.WriteLine("VLC mode");
+                case DeviceMode.ApplicationControl:
+                    Console.WriteLine("Application control mode");
+                    switch ((Interface)Properties.Settings.Default.ApplicationMediaInterface)
+                    {
+                        case Interface.VLC:
+                            int i = 0;
+                            while (Equals(applicationInterface, null) && i < 3)
+                            {
+                                try
+                                {
+                                    applicationInterface = new ApplicationMedia.VLC.Interface(ref remoteConnection);
+                                }
+                                catch (System.Net.Sockets.SocketException)
+                                {
+                                    i++;
+                                }
+                            }
+                            break;
+                        case Interface.iTunes:
+                            applicationInterface = new ApplicationMedia.iTunes.Interface(ref remoteConnection);
+                            break;
+                    }
 
                     // Make three attempts at a connection
-                    int i = 0;
-                    while (Equals(vlcInterface, null) && i < 3 )
-                    {
-                        try
-                        {
-                            vlcInterface = new VLC.Interface(ref remoteConnection);
-                        }
-                        catch (System.Net.Sockets.SocketException)
-                        {
-                            i++;
-                        }
-                    }
+                    
                     break;
-                case DeviceMode.MEDIA:
+                case DeviceMode.SystemMedia:
                     Console.WriteLine("Media mode");
                     break;
-                case DeviceMode.MENU:
+                case DeviceMode.Menu:
                     Console.WriteLine("Menu mode");
                     break;
                 default:
@@ -86,42 +91,42 @@ namespace CompanionApplication
             // Commands for specific mode
             switch (deviceMode)
             {
-                case DeviceMode.CLOCK:
+                case DeviceMode.Clock:
                     break;
-                case DeviceMode.VLC:
+                case DeviceMode.ApplicationControl:
                     switch (identifier)
                     {
                         case "VOLCHANGE":
-                            vlcInterface.VolumeAdjust(int.Parse(parameters[0]));
+                            applicationInterface.VolumeAdjust(int.Parse(parameters[0]));
                             break;
                         case "NEXT":
-                            vlcInterface.Next();
+                            applicationInterface.Next();
                             break;
                         case "PREV":
-                            vlcInterface.Prev();
+                            applicationInterface.Prev();
                             break;
                         case "PAUSE":
-                            vlcInterface.Pause();
+                            applicationInterface.PlayPause();
                             break;
                         case "SHUFFLE":
-                            vlcInterface.ShuffleToggle();
+                            applicationInterface.ShuffleToggle();
                             break;
                         case "REPEAT":
-                            vlcInterface.RepeatInc();
+                            applicationInterface.RepeatInc();
                             break;
                     }
 
                     break;
-                case DeviceMode.MEDIA:
+                case DeviceMode.SystemMedia:
                     break;
-                case DeviceMode.MENU:
+                case DeviceMode.Menu:
                     break;
             }
         }
 
         public void Disconnect()
         {
-
+            applicationInterface.Disconnect();
         }
         
 

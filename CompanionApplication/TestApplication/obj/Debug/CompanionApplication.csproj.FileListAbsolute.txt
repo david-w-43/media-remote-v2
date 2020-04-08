@@ -23,3 +23,5 @@ D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\De
 D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.exe
 D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.pdb
 D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.Settings.resources
+D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\Interop.iTunesLib.dll
+D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.csproj.ResolveComReference.cache

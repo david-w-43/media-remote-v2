@@ -12,7 +12,8 @@ namespace CompanionApplication
         
         public RemoteConnection connection;
         public CommandHandler commandHandler;
-        SystemAudioController systemAudio;
+
+        private MenuItem VLCSwitch, iTunesSwitch;
 
         /// <summary>
         /// Initialises a system tray icon
@@ -24,13 +25,28 @@ namespace CompanionApplication
             {
                 Icon = Properties.Resources.display,
                 ContextMenu = new ContextMenu(new MenuItem[] {
-                
+
                 new MenuItem("Settings", OpenSettings), // Opens the settings form
+                new MenuItem("-"), // Separator
+                VLCSwitch = new MenuItem("VLC", MediaApplicationChange) { RadioCheck = true },
+                iTunesSwitch = new MenuItem("iTunes", MediaApplicationChange) { RadioCheck = true },
                 new MenuItem("-"), // Separator
                 new MenuItem("Exit", Exit), // Exits application
             }),
                 Visible = true
             };
+
+            if ((ApplicationMedia.Interface)Properties.Settings.Default.ApplicationMediaInterface 
+                == ApplicationMedia.Interface.VLC)
+            {
+                VLCSwitch.Checked = true;
+                iTunesSwitch.Checked = false;
+            }
+            else
+            {
+                VLCSwitch.Checked = false;
+                iTunesSwitch.Checked = true;
+            }
 
             // Create new connection, remote and SAC
             connection = new RemoteConnection(commandHandler);
@@ -59,6 +75,25 @@ namespace CompanionApplication
                 // Update remote with relevant settings
                 connection.UpdateRemote();
             }
+        }
+
+        void MediaApplicationChange(object sender, EventArgs e)
+        {
+            // Change settings and 
+            if (sender == VLCSwitch)
+            {
+                VLCSwitch.Checked = true;
+                iTunesSwitch.Checked = false;
+                Properties.Settings.Default.ApplicationMediaInterface = 0;
+            }
+            else if (sender == iTunesSwitch)
+            {
+                VLCSwitch.Checked = false;
+                iTunesSwitch.Checked = true;
+                Properties.Settings.Default.ApplicationMediaInterface = 1;
+            }
+
+            Properties.Settings.Default.Save();
         }
     }
 }
