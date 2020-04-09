@@ -12,8 +12,10 @@ namespace CompanionApplication
         
         public RemoteConnection connection;
         public CommandHandler commandHandler;
+        private Discord.DiscordRichPresence richPresence;
 
         private MenuItem VLCSwitch, iTunesSwitch;
+        private MenuItem DVOff, DVFull, DVLimited;
 
         /// <summary>
         /// Initialises a system tray icon
@@ -27,6 +29,13 @@ namespace CompanionApplication
                 ContextMenu = new ContextMenu(new MenuItem[] {
 
                 new MenuItem("Settings", OpenSettings), // Opens the settings form
+                new MenuItem("-"), // Separator
+                new MenuItem("Discord", new MenuItem[]
+                {
+                    DVFull = new MenuItem("Full", SetDiscordVerbosity) { RadioCheck = true },
+                    DVLimited = new MenuItem("Limited", SetDiscordVerbosity) { RadioCheck = true },
+                    DVOff = new MenuItem("Off", SetDiscordVerbosity) { RadioCheck = true },
+                }),
                 new MenuItem("-"), // Separator
                 VLCSwitch = new MenuItem("VLC", MediaApplicationChange) { RadioCheck = true },
                 iTunesSwitch = new MenuItem("iTunes", MediaApplicationChange) { RadioCheck = true },
@@ -48,8 +57,22 @@ namespace CompanionApplication
                 iTunesSwitch.Checked = true;
             }
 
+            switch ((Discord.DiscordVerbosity)Properties.Settings.Default.DiscordRPVerbosity)
+            {
+                case Discord.DiscordVerbosity.off:
+                    DVOff.Checked = true;
+                    break;
+                case Discord.DiscordVerbosity.full:
+                    DVFull.Checked = true;
+                    break;
+                case Discord.DiscordVerbosity.limited:
+                    DVLimited.Checked = true;
+                    break;
+            }
+
             // Create new connection, remote and SAC
-            connection = new RemoteConnection(commandHandler);
+            richPresence = new Discord.DiscordRichPresence();
+            connection = new RemoteConnection(ref commandHandler, ref richPresence);
         }
 
         /// <summary>
@@ -61,6 +84,8 @@ namespace CompanionApplication
         {
             // Hide tray icon, otherwise it will remain shown until user mouses over it
             trayIcon.Visible = false;
+
+            richPresence.Dispose();
 
             Application.Exit();
         }
@@ -94,6 +119,40 @@ namespace CompanionApplication
             }
 
             Properties.Settings.Default.Save();
+
+            DeviceMode mode = commandHandler.GetDeviceMode();
+            if (mode == DeviceMode.ApplicationControl)
+            {
+                // Restart application with new applicaiton
+                //Application.Restart();
+                commandHandler.RefreshApplication();
+            }
+        }
+
+        void SetDiscordVerbosity(object sender, EventArgs e)
+        {
+            if (sender == DVOff)
+            {
+                Properties.Settings.Default.DiscordRPVerbosity = (int)Discord.DiscordVerbosity.off;
+                DVOff.Checked = true;
+                DVFull.Checked = false;
+                DVLimited.Checked = false;
+            }
+            else if (sender == DVFull)
+            {
+                Properties.Settings.Default.DiscordRPVerbosity = (int)Discord.DiscordVerbosity.full;
+                DVOff.Checked = false;
+                DVFull.Checked = true;
+                DVLimited.Checked = false;
+            }
+            else if (sender == DVLimited)
+            {
+                Properties.Settings.Default.DiscordRPVerbosity = (int)Discord.DiscordVerbosity.limited;
+                DVOff.Checked = false;
+                DVFull.Checked = false;
+                DVLimited.Checked = true;
+            }
+            richPresence.UpdateVerbosity((Discord.DiscordVerbosity)Properties.Settings.Default.DiscordRPVerbosity);
         }
     }
 }

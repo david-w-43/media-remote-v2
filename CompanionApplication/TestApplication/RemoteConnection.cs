@@ -25,12 +25,12 @@ namespace CompanionApplication
         /// <summary>
         /// Initiates a serial connection with the remote
         /// </summary>
-        public RemoteConnection(CommandHandler commandHandler) // Constructor
+        public RemoteConnection(ref CommandHandler commandHandler, ref Discord.DiscordRichPresence richPresence) // Constructor
         {
             // Shorthand access to application settings
             var settings = Properties.Settings.Default;
 
-            this.commandHandler = commandHandler = new CommandHandler(this);
+            this.commandHandler = commandHandler = new CommandHandler(this, richPresence);
 
             List<string> systemPorts = new List<string>(); // Define list of system ports
             //Try last used port first
@@ -182,7 +182,6 @@ namespace CompanionApplication
             }
         }
 
-
         /// <summary>
         /// Updates settings of remote
         /// </summary>
@@ -200,6 +199,5 @@ namespace CompanionApplication
             if (settings.DisplayAlbum) { val = 1; } else { val = 0; }
             Send("UPDALBUM(" + val + ")");
         }
-
     }
 }

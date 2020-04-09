@@ -106,5 +106,17 @@ namespace CompanionApplication.Properties {
                 this["ApplicationMediaInterface"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int DiscordRPVerbosity {
+            get {
+                return ((int)(this["DiscordRPVerbosity"]));
+            }
+            set {
+                this["DiscordRPVerbosity"] = value;
+            }
+        }
     }
 }

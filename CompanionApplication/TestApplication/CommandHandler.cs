@@ -16,11 +16,14 @@ namespace CompanionApplication
         public RemoteConnection remoteConnection;
         private ApplicationInterface applicationInterface;
 
+        public Discord.DiscordRichPresence richPresence;
+
         private DeviceMode deviceMode;
 
-        public CommandHandler(RemoteConnection remoteConnection)
+        public CommandHandler(RemoteConnection remoteConnection, Discord.DiscordRichPresence richPresence)
         {
             this.remoteConnection = remoteConnection;
+            this.richPresence = richPresence;
         }
 
         public DeviceMode GetDeviceMode()
@@ -47,7 +50,7 @@ namespace CompanionApplication
                             {
                                 try
                                 {
-                                    applicationInterface = new ApplicationMedia.VLC.Interface(ref remoteConnection);
+                                    applicationInterface = new ApplicationMedia.VLC.Interface(ref remoteConnection, ref richPresence);
                                 }
                                 catch (System.Net.Sockets.SocketException)
                                 {
@@ -56,12 +59,9 @@ namespace CompanionApplication
                             }
                             break;
                         case Interface.iTunes:
-                            applicationInterface = new ApplicationMedia.iTunes.Interface(ref remoteConnection);
+                            applicationInterface = new ApplicationMedia.iTunes.Interface(ref remoteConnection, ref richPresence);
                             break;
                     }
-
-                    // Make three attempts at a connection
-                    
                     break;
                 case DeviceMode.SystemMedia:
                     Console.WriteLine("Media mode");
@@ -124,11 +124,19 @@ namespace CompanionApplication
             }
         }
 
-        public void Disconnect()
+        public void RefreshApplication()
         {
             applicationInterface.Disconnect();
+            switch ((Interface)Properties.Settings.Default.ApplicationMediaInterface)
+            {
+                case Interface.VLC:
+                    applicationInterface = new ApplicationMedia.VLC.Interface(ref remoteConnection, ref richPresence);
+                    break;
+                case Interface.iTunes:
+                    applicationInterface = new ApplicationMedia.iTunes.Interface(ref remoteConnection, ref richPresence);
+                    break;
+            }
+            
         }
-        
-
     }
 }

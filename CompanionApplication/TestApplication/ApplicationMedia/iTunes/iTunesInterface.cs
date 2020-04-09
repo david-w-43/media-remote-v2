@@ -12,12 +12,19 @@ namespace CompanionApplication.ApplicationMedia.iTunes
     {
         iTunesApp application;
 
-        public Interface(ref RemoteConnection remoteConnection)
+        public Interface(ref RemoteConnection remoteConnection, ref Discord.DiscordRichPresence richPresence)
         {
+            currentValues.player = ApplicationMedia.Interface.iTunes;
+
             this.remoteConnection = remoteConnection;
+            this.richPresence = richPresence;
+
+            if (richPresence.IsDisposed()) { richPresence = new Discord.DiscordRichPresence(); }
+
             application = new iTunesApp();
 
             updateTimer.Elapsed += UpdateInformation;
+            updateTimer.Elapsed += UpdateDiscord;
             updateTimer.Start();
         }
 
@@ -25,51 +32,56 @@ namespace CompanionApplication.ApplicationMedia.iTunes
         {
             // Get current track
             IITTrack currentTrack = application.CurrentTrack;
-            
-            // Grab values
-            currentValues.title = currentTrack.Name;
-            currentValues.artist = currentTrack.Artist;
-            currentValues.album = currentTrack.Album;
-            currentValues.trackLength = currentTrack.Duration;
 
-            currentValues.playbackPos = application.PlayerPosition;
-            currentValues.volume = application.SoundVolume;
-            currentValues.shuffle = application.CurrentPlaylist.Shuffle;
-            currentValues.filepath = application.CurrentStreamURL;
-
-            // Convert iTunes repeat mode enum
-            switch (application.CurrentPlaylist.SongRepeat)
+            if (application.PlayerState != ITPlayerState.ITPlayerStateStopped)
             {
-                case ITPlaylistRepeatMode.ITPlaylistRepeatModeOff:
-                    currentValues.repeatMode = RepeatMode.off;
-                    break;
-                case ITPlaylistRepeatMode.ITPlaylistRepeatModeOne:
-                    currentValues.repeatMode = RepeatMode.one;
-                    break;
-                case ITPlaylistRepeatMode.ITPlaylistRepeatModeAll:
-                    currentValues.repeatMode = RepeatMode.all;
-                    break;
-            }
+                // Grab values
+                currentValues.title = currentTrack.Name;
+                currentValues.artist = currentTrack.Artist;
+                currentValues.album = currentTrack.Album;
+                currentValues.trackLength = currentTrack.Duration;
 
-            // Convert iTunes play status
-            switch (application.PlayerState)
-            {
-                case ITPlayerState.ITPlayerStateStopped:
-                    currentValues.playStatus = PlayStatus.stopped;
-                    break;
-                case ITPlayerState.ITPlayerStatePlaying:
-                    currentValues.playStatus = PlayStatus.playing;
-                    break;
-                case ITPlayerState.ITPlayerStateFastForward:
-                    currentValues.playStatus = PlayStatus.fastforward;
-                    break;
-                case ITPlayerState.ITPlayerStateRewind:
-                    currentValues.playStatus = PlayStatus.rewind;
-                    break;
-            }
+                currentValues.playbackPos = application.PlayerPosition;
+                currentValues.volume = application.SoundVolume;
+                currentValues.shuffle = application.CurrentPlaylist.Shuffle;
+                currentValues.filepath = application.CurrentStreamURL;
 
-            // If values have changed, update remote display
-            if (!Equals(currentValues, prevValues)) { UpdateRemote(); }
+                // Convert iTunes repeat mode enum
+                switch (application.CurrentPlaylist.SongRepeat)
+                {
+                    case ITPlaylistRepeatMode.ITPlaylistRepeatModeOff:
+                        currentValues.repeatMode = RepeatMode.off;
+                        break;
+                    case ITPlaylistRepeatMode.ITPlaylistRepeatModeOne:
+                        currentValues.repeatMode = RepeatMode.one;
+                        break;
+                    case ITPlaylistRepeatMode.ITPlaylistRepeatModeAll:
+                        currentValues.repeatMode = RepeatMode.all;
+                        break;
+                }
+
+                IITEncoder encoder = application.CurrentEncoder;
+
+                // Convert iTunes play status
+                switch (application.PlayerState)
+                {
+                    case ITPlayerState.ITPlayerStateStopped:
+                        currentValues.playStatus = PlayStatus.stopped;
+                        break;
+                    case ITPlayerState.ITPlayerStatePlaying:
+                        currentValues.playStatus = PlayStatus.playing;
+                        break;
+                    case ITPlayerState.ITPlayerStateFastForward:
+                        currentValues.playStatus = PlayStatus.fastforward;
+                        break;
+                    case ITPlayerState.ITPlayerStateRewind:
+                        currentValues.playStatus = PlayStatus.rewind;
+                        break;
+                }
+
+                // If values have changed, update remote display
+                if (!Equals(currentValues, prevValues)) { UpdateRemote(); }
+            }
         }
 
         private void UpdateRemote()
@@ -146,8 +158,10 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
         public override void Disconnect()
         {
+            updateTimer.Stop();
             // Stop playback
             application.Stop();
+            richPresence.Dispose();
         }
     }
 }

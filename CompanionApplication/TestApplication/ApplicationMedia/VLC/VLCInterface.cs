@@ -17,7 +17,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
         /// Initiates connection to TCP socket
         /// </summary>
         /// <param name="remoteConnection">Serial connection to remote</param>
-        public Interface(ref RemoteConnection remoteConnection)
+        public Interface(ref RemoteConnection remoteConnection, ref Discord.DiscordRichPresence richPresence)
         {
             try
             {
@@ -25,6 +25,10 @@ namespace CompanionApplication.ApplicationMedia.VLC
                 client = new Networking.Client();
 
                 this.remoteConnection = remoteConnection;
+                this.richPresence = richPresence;
+                currentValues.player = ApplicationMedia.Interface.VLC;
+
+                if (richPresence.IsDisposed()) { richPresence = new Discord.DiscordRichPresence(); }
 
                 // Grab settings
                 string hostname = Properties.Settings.Default.TCPHostname;
@@ -40,6 +44,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
 
                 // Start timer to update metadata
                 updateTimer.Elapsed += UpdateInformation;
+                updateTimer.Elapsed += UpdateDiscord;
                 updateTimer.Start();
             }
             catch (System.Net.Sockets.SocketException)
@@ -132,9 +137,10 @@ namespace CompanionApplication.ApplicationMedia.VLC
             }
 
             // Checks if the track is new
-            if (!Equals(currentValues.filepath, prevValues.filepath) || !lengthFound)
+            if ((!Equals(currentValues.filepath, prevValues.filepath) || !lengthFound) && filepathFound)
             {
                 artistFound = albumFound = titleFound = lengthFound = false;
+                currentValues.mediaType = MediaType.audio;
 
                 // Request track metadata
                 client.SendLine("info");
@@ -162,6 +168,10 @@ namespace CompanionApplication.ApplicationMedia.VLC
                         int start = line.IndexOf(':') + 2;
                         currentValues.title = line.Substring(start);
                         titleFound = true;
+                    }
+                    else if (line.Contains("| Type: Video"))
+                    {
+                        currentValues.mediaType = MediaType.video;
                     }
                 } 
 
@@ -323,8 +333,10 @@ namespace CompanionApplication.ApplicationMedia.VLC
 
         public override void Disconnect()
         {
+            updateTimer.Stop();
             // Stop playback
             client.SendLine("stop");
+            richPresence.Dispose();
         }
     }
 }

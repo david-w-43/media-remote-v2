@@ -10,12 +10,14 @@ namespace CompanionApplication.ApplicationMedia
     public enum Interface { VLC, iTunes };
     public enum RepeatMode { off, all, one };
     public enum PlayStatus { playing, paused, stopped, fastforward, rewind };
+    public enum MediaType { audio, video };
 
     /// <summary>
     /// Stores playback values
     /// </summary>
     public struct Values
     {
+        public Interface player;
         public string title;
         public string artist;
         public string album;
@@ -26,6 +28,7 @@ namespace CompanionApplication.ApplicationMedia
         public bool shuffle;
         public string filepath;
         public PlayStatus playStatus;
+        public MediaType mediaType;
     }
 
     /// <summary>
@@ -36,6 +39,7 @@ namespace CompanionApplication.ApplicationMedia
         protected Values currentValues, prevValues;
 
         protected RemoteConnection remoteConnection;
+        protected Discord.DiscordRichPresence richPresence;
 
         protected Timer updateTimer = new Timer {
             AutoReset = true,
@@ -115,5 +119,19 @@ namespace CompanionApplication.ApplicationMedia
         /// Disconnects from interface
         /// </summary>
         public virtual void Disconnect() { }
+
+        /// <summary>
+        /// Returns the current values
+        /// </summary>
+        /// <returns></returns>
+        public Values GetValues()
+        {
+            return currentValues;
+        }
+
+        protected void UpdateDiscord(object sender, ElapsedEventArgs e)
+        {
+            richPresence.UpdatePresence(currentValues);
+        }
     }
 }
