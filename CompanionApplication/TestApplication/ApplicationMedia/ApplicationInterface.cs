@@ -129,9 +129,20 @@ namespace CompanionApplication.ApplicationMedia
             return currentValues;
         }
 
-        protected void UpdateDiscord(object sender, ElapsedEventArgs e)
+        /// <summary>
+        /// Pushes updated values to remote and Discord
+        /// </summary>
+        /// <param name="commands"></param>
+        protected void PushUpdate(List<string> commands)
         {
+            // Push commands to remote
+            remoteConnection.Send(commands);
+
+            // Update Discord RP
             richPresence.UpdatePresence(currentValues);
+
+            // Update previous values
+            prevValues = currentValues;
         }
     }
 }

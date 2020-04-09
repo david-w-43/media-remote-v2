@@ -24,7 +24,6 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             application = new iTunesApp();
 
             updateTimer.Elapsed += UpdateInformation;
-            updateTimer.Elapsed += UpdateDiscord;
             updateTimer.Start();
         }
 
@@ -114,14 +113,12 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             // Repeat mode
             if (currentValues.repeatMode != prevValues.repeatMode)
             {
-                remoteConnection.Send("REPEATMODE(" + (int)currentValues.repeatMode + ")");
+                toSend.Add("REPEATMODE(" + (int)currentValues.repeatMode + ")");
             }
 
             // Send data to remote
-            remoteConnection.Send(toSend);
+            PushUpdate(toSend);
 
-            // update previous values
-            prevValues = currentValues;
         }
 
         public override void Next() { application.NextTrack(); }

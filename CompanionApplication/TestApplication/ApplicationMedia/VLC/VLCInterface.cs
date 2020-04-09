@@ -44,7 +44,6 @@ namespace CompanionApplication.ApplicationMedia.VLC
 
                 // Start timer to update metadata
                 updateTimer.Elapsed += UpdateInformation;
-                updateTimer.Elapsed += UpdateDiscord;
                 updateTimer.Start();
             }
             catch (System.Net.Sockets.SocketException)
@@ -206,10 +205,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
             if (currentValues.playStatus != prevValues.playStatus) { toSend.Add("STATUS(" + currentValues.playStatus + ")"); }
             if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add("TIME(" + currentValues.playbackPos + ")"); }
 
-            remoteConnection.Send(toSend);
-
-            // Set previous values equal to current values
-            prevValues = currentValues;
+            PushUpdate(toSend);
         }
 
         /// <summary>
