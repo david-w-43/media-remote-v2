@@ -17,8 +17,20 @@ namespace CompanionApplication
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Runs the system tray icon
-            Application.Run(new ControlIcon());
+            // Check if program already running
+            string applicationName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+            System.Diagnostics.Process[] processes = System.Diagnostics.Process.GetProcessesByName(applicationName);
+
+            // Exits application if more than one exist
+            if (processes.Count() > 1) {
+                Application.Exit();
+            }
+            else
+            {
+                // Continue as normal
+                // Runs the system tray icon
+                Application.Run(new ControlIcon());
+            }
         }
     }
 }
