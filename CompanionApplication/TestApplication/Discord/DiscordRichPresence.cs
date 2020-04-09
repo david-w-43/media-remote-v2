@@ -21,6 +21,10 @@ namespace CompanionApplication.Discord
             UpdateVerbosity((DiscordVerbosity)Properties.Settings.Default.DiscordRPVerbosity);
         }
 
+        /// <summary>
+        /// Updates rich presence with current values
+        /// </summary>
+        /// <param name="values"></param>
         public void UpdatePresence(ApplicationMedia.Values values)
         {
             if (client != null)
@@ -86,6 +90,10 @@ namespace CompanionApplication.Discord
             }
         }
 
+        /// <summary>
+        /// Updates verbosity of rich presence
+        /// </summary>
+        /// <param name="verbosity"></param>
         public void UpdateVerbosity(DiscordVerbosity verbosity)
         {
             this.verbosity = verbosity;
@@ -97,12 +105,18 @@ namespace CompanionApplication.Discord
             }
         }
 
+        /// <summary>
+        /// Initialises Discord RP client
+        /// </summary>
         public void InitialiseClient()
         {
             client = new DiscordRpcClient(key);
             client.Initialize();
         }
 
+        /// <summary>
+        /// Disposes of the Discord RP client
+        /// </summary>
         public void Dispose()
         {
             if (client != null)
@@ -111,6 +125,10 @@ namespace CompanionApplication.Discord
             }
         }
 
+        /// <summary>
+        /// Returns true if client is disposed or null
+        /// </summary>
+        /// <returns></returns>
         public bool IsDisposed()
         {
             if ((client == null) || (client.IsDisposed))
