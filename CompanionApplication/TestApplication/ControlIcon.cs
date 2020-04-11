@@ -30,6 +30,16 @@ namespace CompanionApplication
 
                 new MenuItem("Settings", OpenSettings), // Opens the settings form
                 new MenuItem("-"), // Separator
+                new MenuItem("Backlight", new MenuItem[]
+                {
+                    new MenuItem("100%", SetBacklight) { RadioCheck = true },
+                    new MenuItem("80%", SetBacklight) { RadioCheck = true },
+                    new MenuItem("60%", SetBacklight) { RadioCheck = true },
+                    new MenuItem("40%", SetBacklight) { RadioCheck = true },
+                    new MenuItem("20%", SetBacklight) { RadioCheck = true },
+                    new MenuItem("10%", SetBacklight) { RadioCheck = true }
+                }),
+                new MenuItem("-"), // Separator
                 new MenuItem("Discord", new MenuItem[]
                 {
                     DVFull = new MenuItem("Full", SetDiscordVerbosity) { RadioCheck = true },
@@ -105,13 +115,13 @@ namespace CompanionApplication
         void MediaApplicationChange(object sender, EventArgs e)
         {
             // Change settings and 
-            if (sender == VLCSwitch)
+            if (sender == VLCSwitch && !VLCSwitch.Checked)
             {
                 VLCSwitch.Checked = true;
                 iTunesSwitch.Checked = false;
                 Properties.Settings.Default.ApplicationMediaInterface = 0;
             }
-            else if (sender == iTunesSwitch)
+            else if (sender == iTunesSwitch && !iTunesSwitch.Checked)
             {
                 VLCSwitch.Checked = false;
                 iTunesSwitch.Checked = true;
@@ -131,21 +141,25 @@ namespace CompanionApplication
 
         void SetDiscordVerbosity(object sender, EventArgs e)
         {
-            if (sender == DVOff)
+            // If verbosity switched
+            if (sender == DVOff && !DVOff.Checked)
             {
+                // Write to settings
                 Properties.Settings.Default.DiscordRPVerbosity = (int)Discord.DiscordVerbosity.off;
+
+                // Check buttons as appropriate
                 DVOff.Checked = true;
                 DVFull.Checked = false;
                 DVLimited.Checked = false;
             }
-            else if (sender == DVFull)
+            else if (sender == DVFull && !DVFull.Checked)
             {
                 Properties.Settings.Default.DiscordRPVerbosity = (int)Discord.DiscordVerbosity.full;
                 DVOff.Checked = false;
                 DVFull.Checked = true;
                 DVLimited.Checked = false;
             }
-            else if (sender == DVLimited)
+            else if (sender == DVLimited && !DVLimited.Checked)
             {
                 Properties.Settings.Default.DiscordRPVerbosity = (int)Discord.DiscordVerbosity.limited;
                 DVOff.Checked = false;
@@ -153,6 +167,26 @@ namespace CompanionApplication
                 DVLimited.Checked = true;
             }
             richPresence.UpdateVerbosity((Discord.DiscordVerbosity)Properties.Settings.Default.DiscordRPVerbosity);
+
+            // Save settings
+            Properties.Settings.Default.Save();
+        }
+
+        void SetBacklight(object sender, EventArgs e)
+        {
+            // Uncheck all menuitems and check sender
+            foreach (MenuItem item in ((MenuItem)sender).Parent.MenuItems)
+            {
+                item.Checked = false;
+            }
+            ((MenuItem)sender).Checked = true;
+
+
+            // Get value of button
+            float value = int.Parse(((MenuItem)sender).Text.TrimEnd('%')) / 100f;
+            int scaled = (int)Math.Round((Math.Pow(value, 2) * 255));
+
+            connection.Send(new Command("UPDBRIGHT", scaled));
         }
     }
 }
