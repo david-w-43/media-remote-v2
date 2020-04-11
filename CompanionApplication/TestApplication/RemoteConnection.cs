@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace CompanionApplication
 {
+    /// <summary>
+    /// Facilitates construction and formatting of commands to be sent to remote
+    /// </summary>
     public class Command
     {
         public readonly string identifier, parameter;
@@ -51,16 +54,27 @@ namespace CompanionApplication
         }
     }
 
+    /// <summary>
+    /// Buffer of commands
+    /// </summary>
     public class CommandCache
     {
-        private List<Command> cache = new List<Command>(10);
+        private const int cacheSize = 10;
+        private List<Command> cache = new List<Command>(cacheSize);
+        //private Command[] cache = new Command[cacheSize];
 
         public void Add(Command command) {
-            if (cache.Count < cache.Capacity) { cache.Add(command); }
+            if (cache.Count < cacheSize) { cache.Add(command); }
             else
-            { 
-                cache.RemoveAt(0);
-                cache.Add(command);
+            {
+                // Move items down
+                for (int i = 0; i < cacheSize - 1; i++)
+                {
+                    cache[i] = cache[i + 1];
+                }
+
+                // Add latest
+                cache[cacheSize - 1] = command;
             }
         }
 
