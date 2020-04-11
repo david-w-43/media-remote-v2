@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AudioSwitcher.AudioApi.CoreAudio;
 
-namespace CompanionApplication
+namespace CompanionApplication.SystemMedia
 {
     /// <summary>
     /// Controls system audio
