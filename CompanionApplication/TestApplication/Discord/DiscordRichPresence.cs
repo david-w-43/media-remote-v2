@@ -69,9 +69,15 @@ namespace CompanionApplication.Discord
                         switch (verbosity)
                         {
                             case DiscordVerbosity.full:
+
+                                // Shorten title and artist if necessary
+                                string title = prefix + values.title;
+                                if (title.Length >= 127) { title = title.Substring(0, 123) + "..."; }
+                                if (artist.Length >= 127) { artist = artist.Substring(0, 123) + "..."; }
+
                                 client.SetPresence(new RichPresence()
                                 {
-                                    Details = prefix + values.title,
+                                    Details = title,
                                     State = artist,
                                     Assets = images,
                                     Timestamps = new Timestamps()
