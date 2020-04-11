@@ -73,49 +73,45 @@ namespace CompanionApplication.ApplicationMedia.VLC.Networking
             bool outputCompleteFlag = false;
             List<string> output = new List<string>();
 
-            while (!outputCompleteFlag)
+            try
             {
-                if ((streamReader.EndOfStream) || (streamReader.Peek() == '>'))
+                while (!outputCompleteFlag)
                 {
-                    outputCompleteFlag = true;
-                    streamReader.DiscardBufferedData();
-                }
-                else
-                {
-                    // Read line
-                    line = streamReader.ReadLine();
-                    //Console.WriteLine(line);
-
-                    // If line not null
-                    if (line != null)
+                    if ((streamReader.EndOfStream) || (streamReader.Peek() == '>'))
                     {
-                        // Remove chevrons and trim
-                        string formatted = line.Trim();
+                        outputCompleteFlag = true;
+                        streamReader.DiscardBufferedData();
+                    }
+                    else
+                    {
+                        // Read line
+                        line = streamReader.ReadLine();
+                        //Console.WriteLine(line);
 
-                        //Console.WriteLine(formatted);
+                        // If line not null
+                        if (line != null)
+                        {
+                            // Remove chevrons and trim
+                            string formatted = line.Trim();
 
-                        output.Add(formatted);
+                            //Console.WriteLine(formatted);
+
+                            output.Add(formatted);
+                        }
                     }
                 }
             }
+            catch (IOException)
+            {
+                Console.WriteLine("Server disconnected");
+                Disconnect();
+            }
+            
 
             // Get rid of excess
             streamReader.DiscardBufferedData();
 
             return output;
-
-            //List<string> lines = new List<string>();
-
-            //string readData = streamReader.ReadToEnd();
-            //Console.WriteLine(readData);
-
-            //// Add lines to list
-            //lines.AddRange(readData.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries));
-
-            //// Remove "> " from list
-            //while (lines.Contains("> ")) { lines.Remove("> "); }
-
-            //return lines;
         }
 
         /// <summary>
@@ -128,7 +124,15 @@ namespace CompanionApplication.ApplicationMedia.VLC.Networking
 
             data += "\r\n";
             byte[] writeBuffer = Encoding.UTF8.GetBytes(data);
-            clientStream.Write(writeBuffer, 0, writeBuffer.Length);
+            try
+            {
+                clientStream.Write(writeBuffer, 0, writeBuffer.Length);
+            }
+            catch (ObjectDisposedException)
+            {
+                Console.WriteLine("Attempted to write to client but stream already disposed");
+            }
+            
         }
 
         /// <summary>

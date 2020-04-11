@@ -133,7 +133,7 @@ namespace CompanionApplication.ApplicationMedia
         /// Pushes updated values to remote and Discord
         /// </summary>
         /// <param name="commands"></param>
-        protected void PushUpdate(List<string> commands)
+        protected void PushUpdate(List<Command> commands)
         {
             // Push commands to remote
             remoteConnection.Send(commands);

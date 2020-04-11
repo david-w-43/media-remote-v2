@@ -37,6 +37,8 @@ namespace CompanionApplication.ApplicationMedia.VLC
                 // Connect to socket
                 client.ConnectToServer(hostname, port);
 
+                remoteConnection.Send(new Command("CONNECTED", true));
+
                 // Initialise values, these cannot be read from VLC console
                 Shuffle(false);
                 Repeat(RepeatMode.off);
@@ -66,7 +68,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
         protected override void UpdateInformation(object sender, System.Timers.ElapsedEventArgs e)
         {
             // List of commands to send to remote
-            List<string> toSend = new List<string>();
+            List<Command> toSend = new List<Command>();
 
             // Gets filepath, volume and playback status
             client.SendLine("status");
@@ -194,16 +196,16 @@ namespace CompanionApplication.ApplicationMedia.VLC
                 var settings = Properties.Settings.Default;
 
                 // If changed, add to list of commands to send
-                if ((currentValues.title != prevValues.title) || !titleFound) { toSend.Add("TITLE(" + currentValues.title + ")"); }
-                if (((currentValues.artist != prevValues.artist) || !artistFound) &&  !settings.DisplayAlbum) { toSend.Add("ARTIST(" + currentValues.artist + ")"); }
-                if ((currentValues.trackLength != prevValues.trackLength) || !lengthFound ) { toSend.Add("LENGTH(" + currentValues.trackLength + ")"); }
-                if (((currentValues.album != prevValues.album) || !albumFound) && settings.DisplayAlbum) { toSend.Add("ALBUM(" + currentValues.album + ")"); }
+                if ((currentValues.title != prevValues.title) || !titleFound) { toSend.Add(new Command("TITLE", currentValues.title)); }
+                if (((currentValues.artist != prevValues.artist) || !artistFound) &&  !settings.DisplayAlbum) { toSend.Add(new Command("ARTIST", currentValues.artist)); }
+                if ((currentValues.trackLength != prevValues.trackLength) || !lengthFound ) { toSend.Add(new Command("LENGTH", currentValues.trackLength)); }
+                if (((currentValues.album != prevValues.album) || !albumFound) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
             }
 
             // Send updated data to remote
-            if ((currentValues.volume != prevValues.volume) || !volumeFound) { toSend.Add("VOLUME(" + currentValues.volume + ")"); }
-            if (currentValues.playStatus != prevValues.playStatus) { toSend.Add("STATUS(" + currentValues.playStatus + ")"); }
-            if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add("TIME(" + currentValues.playbackPos + ")"); }
+            if ((currentValues.volume != prevValues.volume) || !volumeFound) { toSend.Add(new Command("VOLUME", currentValues.volume)); }
+            if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command("STATUS", (int)currentValues.playStatus)); }
+            if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command("TIME", currentValues.playbackPos)); }
 
             PushUpdate(toSend);
         }
@@ -273,10 +275,13 @@ namespace CompanionApplication.ApplicationMedia.VLC
         {
             currentValues.shuffle = enabled;
 
+            // Send command to VLC
             string onOff = null;
             if (enabled) { onOff = "on"; } else { onOff = "off"; }
             client.SendLine("random " + onOff);
-            remoteConnection.Send("SHUFFLE(" + onOff + ")");
+
+            //remoteConnection.Send("SHUFFLE(" + onOff));
+            remoteConnection.Send(new Command("SHUFFLE", enabled));
         }
 
         /// <summary>
@@ -324,15 +329,19 @@ namespace CompanionApplication.ApplicationMedia.VLC
             currentValues.repeatMode = mode;
 
             // Update display
-            remoteConnection.Send("REPEATMODE(" + (int)currentValues.repeatMode + ")");
+            //remoteConnection.Send("REPEATMODE(" + (int)currentValues.repeatMode));
+            remoteConnection.Send(new Command("REPEATMODE", (int)currentValues.repeatMode));
         }
 
         public override void Disconnect()
         {
+            remoteConnection.Send(new Command("CONNECTED", false));
+
             updateTimer.Stop();
             // Stop playback
             client.SendLine("stop");
             richPresence.Dispose();
+
         }
     }
 }

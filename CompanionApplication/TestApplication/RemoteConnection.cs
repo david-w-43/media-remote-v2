@@ -6,6 +6,74 @@ using System.Threading.Tasks;
 
 namespace CompanionApplication
 {
+    public class Command
+    {
+        public readonly string identifier, parameter;
+        public readonly int parameterLength;
+
+        public Command(string identifier, string parameter)
+        {
+            this.identifier = identifier;
+            this.parameter = parameter;
+            this.parameterLength = parameter.Length;
+        }
+
+        public Command(string identifier, int parameter)
+        {
+            this.identifier = identifier;
+            this.parameter = parameter.ToString();
+            this.parameterLength = this.parameter.Length;
+        }
+
+        public Command(string identifier, bool parameter)
+        {
+            this.identifier = identifier;
+            if (parameter == true)
+            {
+                this.parameter = "1";
+            } else
+            {
+                this.parameter = "0";
+            }
+            this.parameterLength = 1;
+        }
+
+        public Command(string identifier)
+        {
+            this.identifier = identifier;
+            this.parameter = "";
+            parameterLength = 0;
+        }
+
+        public string Format()
+        {
+            return identifier + "(" + parameterLength + "|" + parameter + ")";
+        }
+    }
+
+    public class CommandCache
+    {
+        private List<Command> cache = new List<Command>(10);
+
+        public void Add(Command command) {
+            if (cache.Count < cache.Capacity) { cache.Add(command); }
+            else
+            { 
+                cache.RemoveAt(0);
+                cache.Add(command);
+            }
+        }
+
+        public Command Search(string identifier)
+        {
+            foreach (Command command in cache)
+            {
+                if (command.identifier == identifier) { return command; }
+            }
+            return null;
+        }
+    }
+
     /// <summary>
     /// Serial connection to remote
     /// </summary>
@@ -15,6 +83,8 @@ namespace CompanionApplication
         private const int baudRate = 19200; // Baud rate to use
         private const string handshakeString = "CONNECTIONREQUEST"; // Initiates handshake
         private const string handshakeResponse = "REQUESTACCEPTED"; // The correct response to receive
+
+        CommandCache sentCache = new CommandCache();
 
         // Variable definitions
         private readonly System.IO.Ports.SerialPort serialPort = new System.IO.Ports.SerialPort(); // Serial port
@@ -65,7 +135,7 @@ namespace CompanionApplication
                         serialPort.ReadTimeout = 1000; // 1000 ms read timeout
                         serialPort.Open(); // Opens the port
 
-                        serialPort.WriteLine(handshakeString); // Sends string to remote
+                        serialPort.WriteLine(new Command(handshakeString).Format()); // Sends string to remote
 
                         // Give time for the arduino to respond
                         System.Threading.Thread.Sleep(200);
@@ -111,7 +181,7 @@ namespace CompanionApplication
                     settings.Save();
 
                     // Request current device mode
-                    Send("MODEQUERY");
+                    Send(new Command("MODEQUERY"));
                 }
             }
             if (!connected) { throw new System.IO.IOException("Iterated through all (" + systemPorts.Count + ") ports and remote was not found"); }
@@ -121,24 +191,39 @@ namespace CompanionApplication
         /// Send string to remote
         /// </summary>
         /// <param name="value">String to send</param>
-        public void Send(string value) {
+        public void Send(Command command) {
             // Send Data
-            serialPort.WriteLine(value);
+            serialPort.WriteLine(command.Format());
+
+            // Add data to cache
+            sentCache.Add(command);
 
             // Write to console with timestamp
-            Console.WriteLine(DateTime.Now.Second + "." + DateTime.Now.Millisecond + ": " + value);
+            Console.WriteLine(DateTime.Now.Second + "." + DateTime.Now.Millisecond + ": " + command.Format());
         }
 
         /// <summary>
         /// Send list of strings to remote
         /// </summary>
-        /// <param name="lines">List of strings to send</param>
-        public void Send(List<string> lines)
+        /// <param name="commands">List of commands to send</param>
+        public void Send(List<Command> commands)
         {
-            foreach (string line in lines)
+            foreach (Command command in commands)
             {
-                Send(line);
+                Send(command);
             }
+        }
+
+        /// <summary>
+        /// Called when remote requests a value is resent
+        /// </summary>
+        /// <param name="identifier"></param>
+        private void Resend(string identifier)
+        {
+            // Get the command recently sent with the same identifier
+            Command toSend = sentCache.Search(identifier);
+            // If it exists, resend it
+            if (toSend != null) { Send(toSend); }
         }
 
         /// <summary>
@@ -161,22 +246,17 @@ namespace CompanionApplication
                     {
                         int parametersStart = line.IndexOf("(") + 1;
                         int parametersEnd = line.LastIndexOf(")");
-                        string key = line.Substring(0, parametersStart - 1);
-                        string parametersStr = line.Substring(parametersStart, parametersEnd - parametersStart);
-
-                        // Parse parameters, create list
-                        List<string> parameters = new List<string>();
-                        if (line.Contains(CommandHandler.separator))
-                        {
-                            parameters.AddRange(parametersStr.Split(CommandHandler.separator));
-                        }
-                        else
-                        {
-                            parameters.Add(parametersStr);
-                        }
+                        string identifier = line.Substring(0, parametersStart - 1);
+                        string parameter = line.Substring(parametersStart, parametersEnd - parametersStart);
 
                         // Pass command to command handler
-                        commandHandler.HandleCommand(key, parameters);
+                        if (identifier != "RESEND")
+                        {
+                            commandHandler.HandleCommand(identifier, parameter);
+                        } else
+                        {
+                            Resend(parameter);
+                        }
                     }
                 }
             }
@@ -193,11 +273,13 @@ namespace CompanionApplication
             // Send scroll long text bool
             int val;
             if (settings.ScrollLongText) { val = 1; } else { val = 0; }
-            Send("UPDSCROLL(" + val + ")");
+            //Send("UPDSCROLL(" + val + ")");
+            Send(new Command("UPDSCROLL", val));
 
             // Send display album bool
             if (settings.DisplayAlbum) { val = 1; } else { val = 0; }
-            Send("UPDALBUM(" + val + ")");
+            //Send("UPDALBUM(" + val + ")");
+            Send(new Command("UPDALBUM", val));
         }
     }
 }

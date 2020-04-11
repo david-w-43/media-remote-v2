@@ -55,6 +55,8 @@ namespace CompanionApplication
                                 catch (System.Net.Sockets.SocketException)
                                 {
                                     i++;
+                                    // Wait a small amount of time before second attempt
+                                    System.Threading.Thread.Sleep(50);
                                 }
                             }
                             break;
@@ -77,14 +79,14 @@ namespace CompanionApplication
 
         public void ModeSwitch(int mode) { ModeSwitch((DeviceMode)mode); }
 
-        public void HandleCommand(string identifier, List<string> parameters)
+        public void HandleCommand(string identifier, string parameter)
         {
             // Commands for all modes
             switch (identifier)
             {
                 case "MODESWITCH":
                     // Handles the changing of mode
-                    ModeSwitch(int.Parse(parameters[0]));
+                    ModeSwitch(int.Parse(parameter));
                     break;
             }
 
@@ -97,7 +99,7 @@ namespace CompanionApplication
                     switch (identifier)
                     {
                         case "VOLCHANGE":
-                            applicationInterface.VolumeAdjust(int.Parse(parameters[0]));
+                            applicationInterface.VolumeAdjust(int.Parse(parameter));
                             break;
                         case "NEXT":
                             applicationInterface.Next();

@@ -27,6 +27,7 @@ namespace CompanionApplication.Discord
         /// <param name="values"></param>
         public void UpdatePresence(ApplicationMedia.Values values)
         {
+            
             if (client != null)
             {
                 // Client needs to be initialised first
@@ -34,57 +35,65 @@ namespace CompanionApplication.Discord
 
                 if (!client.IsDisposed && client.IsInitialized)
                 {
-                    // Get large image
-                    Assets images = new Assets();
-                    switch (values.player)
+                    if (values.playStatus == ApplicationMedia.PlayStatus.playing || values.playStatus == ApplicationMedia.PlayStatus.paused)
                     {
-                        case ApplicationMedia.Interface.VLC:
-                            images.LargeImageKey = "vlc";
-                            images.LargeImageText = "VLC Media Player";
-                            break;
-                        case ApplicationMedia.Interface.iTunes:
-                            images.LargeImageKey = "itunes";
-                            images.LargeImageText = "iTunes";
-                            break;
-                    }
+                        // Get large image
+                        Assets images = new Assets();
+                        switch (values.player)
+                        {
+                            case ApplicationMedia.Interface.VLC:
+                                images.LargeImageKey = "vlc";
+                                images.LargeImageText = "VLC Media Player";
+                                break;
+                            case ApplicationMedia.Interface.iTunes:
+                                images.LargeImageKey = "itunes";
+                                images.LargeImageText = "iTunes";
+                                break;
+                        }
 
-                    string prefix, hiddenTitle, artist;
-                    switch (values.mediaType)
-                    {
-                        case ApplicationMedia.MediaType.video:
-                            prefix = "Watching video: ";
-                            hiddenTitle = "Watching a video";
-                            artist = "";
-                            break;
-                        default:
-                            prefix = "Listening to: ";
-                            hiddenTitle = "Listening to music";
-                            artist = "by " + values.artist;
-                            break;
-                    }
+                        string prefix, hiddenTitle, artist;
+                        switch (values.mediaType)
+                        {
+                            case ApplicationMedia.MediaType.video:
+                                prefix = "Watching video: ";
+                                hiddenTitle = "Watching a video";
+                                artist = "";
+                                break;
+                            default:
+                                prefix = "Listening to: ";
+                                hiddenTitle = "Listening to music";
+                                artist = "by " + values.artist;
+                                break;
+                        }
 
-                    switch (verbosity)
-                    {
-                        case DiscordVerbosity.full:
-                            client.SetPresence(new RichPresence()
-                            {
-                                Details = prefix + values.title,
-                                State = artist,
-                                Assets = images,
-                                Timestamps = new Timestamps()
+                        switch (verbosity)
+                        {
+                            case DiscordVerbosity.full:
+                                client.SetPresence(new RichPresence()
                                 {
-                                    End = DateTime.UtcNow + TimeSpan.FromSeconds(values.trackLength - values.playbackPos)
-                                }
-                            });
-                            break;
-                        case DiscordVerbosity.limited:
-                            client.SetPresence(new RichPresence()
-                            {
-                                Details = hiddenTitle,
-                                State = "https://github.com/david-w-43/media-remote-v2",
-                                Assets = images
-                            });
-                            break;
+                                    Details = prefix + values.title,
+                                    State = artist,
+                                    Assets = images,
+                                    Timestamps = new Timestamps()
+                                    {
+                                        End = DateTime.UtcNow + TimeSpan.FromSeconds(values.trackLength - values.playbackPos)
+                                    }
+                                });
+                                break;
+                            case DiscordVerbosity.limited:
+                                client.SetPresence(new RichPresence()
+                                {
+                                    Details = hiddenTitle,
+                                    State = "https://github.com/david-w-43/media-remote-v2",
+                                    Assets = images
+                                });
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // If not playing anything
+                        client.ClearPresence();
                     }
                 }
             }
@@ -121,6 +130,7 @@ namespace CompanionApplication.Discord
         {
             if (client != null)
             {
+                client.ClearPresence();
                 client.Dispose();
             }
         }

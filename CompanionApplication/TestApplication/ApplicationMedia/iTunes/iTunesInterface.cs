@@ -25,6 +25,8 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
             updateTimer.Elapsed += UpdateInformation;
             updateTimer.Start();
+
+            remoteConnection.Send(new Command("CONNECTED", true));
         }
 
         protected override void UpdateInformation(object sender, ElapsedEventArgs e)
@@ -32,7 +34,25 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             // Get current track
             IITTrack currentTrack = application.CurrentTrack;
 
-            if (application.PlayerState != ITPlayerState.ITPlayerStateStopped)
+            // Convert iTunes play status
+            ITPlayerState state = application.PlayerState;
+            switch (state)
+            {
+                case ITPlayerState.ITPlayerStateStopped:
+                    currentValues.playStatus = PlayStatus.stopped;
+                    break;
+                case ITPlayerState.ITPlayerStatePlaying:
+                    currentValues.playStatus = PlayStatus.playing;
+                    break;
+                case ITPlayerState.ITPlayerStateFastForward:
+                    currentValues.playStatus = PlayStatus.fastforward;
+                    break;
+                case ITPlayerState.ITPlayerStateRewind:
+                    currentValues.playStatus = PlayStatus.rewind;
+                    break;
+            }
+
+            if (state != ITPlayerState.ITPlayerStateStopped)
             {
                 // Grab values
                 currentValues.title = currentTrack.Name;
@@ -58,62 +78,40 @@ namespace CompanionApplication.ApplicationMedia.iTunes
                         currentValues.repeatMode = RepeatMode.all;
                         break;
                 }
-
-                IITEncoder encoder = application.CurrentEncoder;
-
-                // Convert iTunes play status
-                switch (application.PlayerState)
-                {
-                    case ITPlayerState.ITPlayerStateStopped:
-                        currentValues.playStatus = PlayStatus.stopped;
-                        break;
-                    case ITPlayerState.ITPlayerStatePlaying:
-                        currentValues.playStatus = PlayStatus.playing;
-                        break;
-                    case ITPlayerState.ITPlayerStateFastForward:
-                        currentValues.playStatus = PlayStatus.fastforward;
-                        break;
-                    case ITPlayerState.ITPlayerStateRewind:
-                        currentValues.playStatus = PlayStatus.rewind;
-                        break;
-                }
-
-                // If values have changed, update remote display
-                if (!Equals(currentValues, prevValues)) { UpdateRemote(); }
             }
+            // If values have changed, update remote display
+            if (!Equals(currentValues, prevValues)) { UpdateRemote(); }
         }
 
         private void UpdateRemote()
         {
             // List of commands to send
-            List<string> toSend = new List<string>();
+            List<Command> toSend = new List<Command>();
 
             // Shorthand for settings
             var settings = Properties.Settings.Default;
 
             // If changed, add to list of commands to send
-            if ((currentValues.title != prevValues.title)) { toSend.Add("TITLE(" + currentValues.title + ")"); }
-            if (((currentValues.artist != prevValues.artist)) && !settings.DisplayAlbum) { toSend.Add("ARTIST(" + currentValues.artist + ")"); }
-            if ((currentValues.trackLength != prevValues.trackLength)) { toSend.Add("LENGTH(" + currentValues.trackLength + ")"); }
-            if (((currentValues.album != prevValues.album)) && settings.DisplayAlbum) { toSend.Add("ALBUM(" + currentValues.album + ")"); }
+            if ((currentValues.title != prevValues.title)) { toSend.Add(new Command("TITLE", currentValues.title)); }
+            if (((currentValues.artist != prevValues.artist)) && !settings.DisplayAlbum) { toSend.Add(new Command("ARTIST", currentValues.artist)); }
+            if ((currentValues.trackLength != prevValues.trackLength)) { toSend.Add(new Command("LENGTH", currentValues.trackLength)); }
+            if (((currentValues.album != prevValues.album)) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
 
             // Send updated data to remote
-            if ((currentValues.volume != prevValues.volume)) { toSend.Add("VOLUME(" + currentValues.volume + ")"); }
-            if (currentValues.playStatus != prevValues.playStatus) { toSend.Add("STATUS(" + currentValues.playStatus + ")"); }
-            if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add("TIME(" + currentValues.playbackPos + ")"); }
+            if ((currentValues.volume != prevValues.volume)) { toSend.Add(new Command("VOLUME", currentValues.volume)); }
+            if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command("STATUS", (int)currentValues.playStatus)); }
+            if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command("TIME", currentValues.playbackPos)); }
 
             // Shuffle
             if (currentValues.shuffle != prevValues.shuffle)
             {
-                string onOff = null;
-                if (currentValues.shuffle) { onOff = "on"; } else { onOff = "off"; }
-                toSend.Add("SHUFFLE(" + onOff + ")");
+                toSend.Add(new Command("SHUFFLE", currentValues.shuffle));
             }
 
             // Repeat mode
             if (currentValues.repeatMode != prevValues.repeatMode)
             {
-                toSend.Add("REPEATMODE(" + (int)currentValues.repeatMode + ")");
+                toSend.Add(new Command("REPEATMODE", (int)currentValues.repeatMode));
             }
 
             // Send data to remote
@@ -155,6 +153,8 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
         public override void Disconnect()
         {
+            remoteConnection.Send(new Command("CONNECTED", false));
+
             updateTimer.Stop();
             // Stop playback
             application.Stop();

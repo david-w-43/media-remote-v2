@@ -19,7 +19,7 @@ const uint8_t* VOLUME_FONT = helv8R;
 #define SHUFFLE_Y 45
 
 #define REPEAT_X 64
-#define REPEAT_Y 45                           
+#define REPEAT_Y 45
 
 #define BAR_Y 55
 #define MARKER_RADIUS 2
@@ -43,6 +43,7 @@ struct Values {
 };
 
 Values currentValues;
+bool applicationConnected = false;
 
 void DisplayApplicationControl() {
   // For testing purposes -----------------------------
@@ -55,59 +56,69 @@ void DisplayApplicationControl() {
   //  currentValues.repeatMode = ALL;
   //  currentValues.shuffle = true;
   // End example values -------------------------------
+  if (applicationConnected || !Serial) {
 
-  // Find difference in encoder value, send as change in volume
-  int encoderValue = enc.read();
-  int encoderDifference = prevEncoderVal - encoderValue;
-  if (encoderDifference != 0)
-  {
-    Serial.println("VOLCHANGE(" + (String)encoderDifference + ")");
-  }
-  prevEncoderVal = encoderValue;
+    // Find difference in encoder value, send as change in volume
+    int encoderValue = enc.read();
+    int encoderDifference = prevEncoderVal - encoderValue;
+    if (encoderDifference != 0)
+    {
+      Serial.println("VOLCHANGE(" + (String)encoderDifference + ")");
+    }
+    prevEncoderVal = encoderValue;
 
-  // Detect new button presses and send appropriate command
-  if (btnA.wasPressed()) {
-    Serial.println("PREV()");
-  }
-  if (btnB.wasPressed()) {
-    Serial.println("REPEAT()");
-  }
-  if (btnC.wasPressed()) {
-    Serial.println("SHUFFLE()");
-  }
-  if (btnD.wasPressed()) {
-    Serial.println("NEXT()");
-  }
-  if (btnENC.wasPressed()) {
-    Serial.println("PAUSE()");
-  }
+    // Detect new button presses and send appropriate command
+    if (btnA.wasPressed()) {
+      Serial.println("PREV()");
+    }
+    if (btnB.wasPressed()) {
+      Serial.println("REPEAT()");
+    }
+    if (btnC.wasPressed()) {
+      Serial.println("SHUFFLE()");
+    }
+    if (btnD.wasPressed()) {
+      Serial.println("NEXT()");
+    }
+    if (btnENC.wasPressed()) {
+      Serial.println("PAUSE()");
+    }
 
-  // Reset font positioning
-  lcd.setFontPosBaseline();
+    // Reset font positioning
+    lcd.setFontPosBaseline();
 
-  // Clear contents of buffer
-  lcd.clearBuffer();
+    // Clear contents of buffer
+    lcd.clearBuffer();
 
-  // Print title
-  PrintTitle();
-  // Print either artist or album
-  if (!deviceOptions.displayAlbum) {
-    PrintArtist();
+    // Print title
+    PrintTitle();
+    // Print either artist or album
+    if (!deviceOptions.displayAlbum) {
+      PrintArtist();
+    } else {
+      PrintAlbum();
+    }
+    // Print volume icon
+    PrintVolume();
+    // Print repeat icon
+    PrintRepeat();
+    // Print shuffle icon
+    PrintShuffle();
+    // Print progress bar
+    PrintBar();
+
+    // Update LCD
+    lcd.sendBuffer();
+    //Serial.println("update" + (millis() - receivedMillis));
   } else {
-    PrintAlbum();
+    // If not connected to the application
+    lcd.clearBuffer();
+    lcd.setFont(helv12R);
+    lcd.drawUTF8(0, 20, "Not connected to");
+    lcd.drawUTF8(0, 40, "media player");
+    lcd.drawUTF8(0, 60, "application");
+    lcd.sendBuffer();
   }
-  // Print volume icon
-  PrintVolume();
-  // Print repeat icon
-  PrintRepeat();
-  // Print shuffle icon
-  PrintShuffle();
-  // Print progress bar
-  PrintBar();
-
-  // Update LCD
-  lcd.sendBuffer();
-  //Serial.println("update" + (millis() - receivedMillis));
 }
 
 void PrintTitle() {
@@ -137,8 +148,8 @@ void ScrollText(String text, int yPos) {
   int excess = strWidth - WIDTH;
   // If scrolling strings is enabled and it is longer than one width
   if ((excess > 0) && deviceOptions.stringScroll) {
-      int offset = (0.5f * excess * cos((float)millis() / ((float)50 * excess))) - (0.5f * excess);
-      lcd.drawUTF8(offset, yPos, charArray);
+    int offset = (0.5f * excess * cos((float)millis() / ((float)50 * excess))) - (0.5f * excess);
+    lcd.drawUTF8(offset, yPos, charArray);
   } else {
     // Draw normally
     lcd.drawUTF8(0, yPos, charArray);
@@ -208,9 +219,15 @@ void PrintBar() {
 
   // posWidth should be fixed for a set number of characters
   int posWidth = 0;
-  if (posStr.length() == 5) { posWidth = lcd.getUTF8Width("00:00"); }
-  else if (posStr.length() == 7) { posWidth = lcd.getUTF8Width("0:00:00"); }
-  else if (posStr.length() == 8) { posWidth = lcd.getUTF8Width("00:00:00"); }
+  if (posStr.length() == 5) {
+    posWidth = lcd.getUTF8Width("00:00");
+  }
+  else if (posStr.length() == 7) {
+    posWidth = lcd.getUTF8Width("0:00:00");
+  }
+  else if (posStr.length() == 8) {
+    posWidth = lcd.getUTF8Width("00:00:00");
+  }
   //int posWidth = lcd.getStrWidth(posStr.c_str());
   int lengthWidth = lcd.getStrWidth(lengthStr.c_str());
 
