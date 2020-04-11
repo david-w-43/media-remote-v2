@@ -14,6 +14,11 @@ namespace CompanionApplication
         public readonly string identifier, parameter;
         public readonly int parameterLength;
 
+        /// <summary>
+        /// Constructs a new command
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="parameter">String parameter</param>
         public Command(string identifier, string parameter)
         {
             this.identifier = identifier;
@@ -21,6 +26,11 @@ namespace CompanionApplication
             this.parameterLength = parameter.Length;
         }
 
+        /// <summary>
+        /// Constructs a new command
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="parameter">Integer parameter</param>
         public Command(string identifier, int parameter)
         {
             this.identifier = identifier;
@@ -28,6 +38,11 @@ namespace CompanionApplication
             this.parameterLength = this.parameter.Length;
         }
 
+        /// <summary>
+        /// Constructs a new command
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="parameter">Boolean parameter</param>
         public Command(string identifier, bool parameter)
         {
             this.identifier = identifier;
@@ -41,6 +56,10 @@ namespace CompanionApplication
             this.parameterLength = 1;
         }
 
+        /// <summary>
+        /// Constructs a new command without parameter
+        /// </summary>
+        /// <param name="identifier"></param>
         public Command(string identifier)
         {
             this.identifier = identifier;
@@ -48,6 +67,10 @@ namespace CompanionApplication
             parameterLength = 0;
         }
 
+        /// <summary>
+        /// Returns command as string, formatted for sending
+        /// </summary>
+        /// <returns></returns>
         public string Format()
         {
             return identifier + "(" + parameterLength + "|" + parameter + ")";
@@ -63,6 +86,10 @@ namespace CompanionApplication
         private List<Command> cache = new List<Command>(cacheSize);
         //private Command[] cache = new Command[cacheSize];
 
+        /// <summary>
+        /// Adds command to the cache
+        /// </summary>
+        /// <param name="command"></param>
         public void Add(Command command) {
             if (cache.Count < cacheSize) { cache.Add(command); }
             else
@@ -78,13 +105,21 @@ namespace CompanionApplication
             }
         }
 
+        /// <summary>
+        /// Searches for the most recently issued command with given identifier
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <returns></returns>
         public Command Search(string identifier)
         {
-            foreach (Command command in cache)
-            {
-                if (command.identifier == identifier) { return command; }
-            }
-            return null;
+            //// Search, most recent first
+            //for (int i = cache.; i >= 0; i--)
+            //{
+            //    if (cache[i].identifier == identifier) { return cache[i]; }
+            //}
+
+            //return null;
+            return cache.FindLast(x => x.identifier == identifier);
         }
     }
 
