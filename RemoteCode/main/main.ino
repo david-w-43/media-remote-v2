@@ -1,3 +1,5 @@
+// Serial buffer size should be set to 256 bytes
+
 // Permanent storage
 #include <EEPROM.h>
 
@@ -186,7 +188,7 @@ void setup() {
 
   lcd.clearBuffer();
   lcd.setFont(profont17);
-  lcd.drawStr(0, 20, "SystemMedia Remote");
+  lcd.drawStr(0, 20, "Media Remote");
   lcd.drawStr(0, 36, "V2");
   lcd.setFont(profont12);
   lcd.drawStr(0, 60, "A second attempt");
@@ -205,7 +207,6 @@ bool longA, longD = false;
 bool prevlongA, prevlongD = false;
 
 void loop() {
-  
   // Toggles each frame
   frameSwitch = !frameSwitch;
   // Gets time between frames

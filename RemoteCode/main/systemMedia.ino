@@ -34,6 +34,8 @@ void DisplaySystemMedia(){
 
   lcd.clearBuffer();
 
+  lcd.setFont(inconsolata24);
+  lcd.drawUTF8(0, 30, "System");
 //  PrintVolume(VOLUME_X, VOLUME_Y, currentSystemMediaValues.volume);
   
   lcd.sendBuffer();
