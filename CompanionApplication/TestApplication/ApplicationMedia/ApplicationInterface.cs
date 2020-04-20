@@ -23,7 +23,7 @@ namespace CompanionApplication.ApplicationMedia
         public string album;
         public int trackLength;
         public int playbackPos;
-        public int volume; // 0 - 100
+        public float volume; // 0 - 100
         public RepeatMode repeatMode;
         public bool shuffle;
         public string filepath;
@@ -139,7 +139,10 @@ namespace CompanionApplication.ApplicationMedia
             remoteConnection.Send(commands);
 
             // Update Discord RP
-            richPresence.UpdatePresence(currentValues);
+            if (!richPresence.IsDisposed())
+            {
+                richPresence.UpdatePresence(currentValues);
+            }
 
             // Update previous values
             prevValues = currentValues;

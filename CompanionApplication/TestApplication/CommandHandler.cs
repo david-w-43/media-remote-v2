@@ -42,6 +42,12 @@ namespace CompanionApplication
                     break;
                 case DeviceMode.ApplicationControl:
                     Console.WriteLine("Application control mode");
+
+                    // Disconnect if not null
+                    //if (applicationInterface != null) { applicationInterface.Finalize(); }
+                    applicationInterface = null;
+
+                    // Instantiate appropriate connection
                     switch ((Interface)Properties.Settings.Default.ApplicationMediaInterface)
                     {
                         case Interface.VLC:
@@ -139,6 +145,12 @@ namespace CompanionApplication
                     break;
             }
             
+        }
+
+        public void Disconnect()
+        {
+            if (applicationInterface != null) { applicationInterface.Disconnect(); }
+            if (remoteConnection != null) { remoteConnection.Disconnect(); }
         }
     }
 }

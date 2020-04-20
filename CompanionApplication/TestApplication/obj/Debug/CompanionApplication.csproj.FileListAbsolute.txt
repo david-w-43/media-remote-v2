@@ -30,3 +30,7 @@ D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\bin\De
 D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\bin\Debug\DiscordRPC.pdb
 D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\bin\Debug\DiscordRPC.xml
 D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\bin\Debug\Newtonsoft.Json.xml
+D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\bin\Debug\CompanionApplication.exe.manifest
+D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\bin\Debug\CompanionApplication.application
+D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.exe.manifest
+D:\Documents\GitHub\media-remote-new\CompanionApplication\TestApplication\obj\Debug\CompanionApplication.application

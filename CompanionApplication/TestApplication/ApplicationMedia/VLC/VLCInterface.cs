@@ -90,16 +90,20 @@ namespace CompanionApplication.ApplicationMedia.VLC
                     //Console.WriteLine(currentValues.filepath);
                 } else if (line.Contains("audio volume"))
                 {
-                    // Parse volume
-                    //Console.WriteLine(line);
-                    int start = line.IndexOf(':') + 2;
-                    int end = line.LastIndexOf(" )");
-                    string substring = line.Substring(start, end - start);
-                    //Console.WriteLine(substring);
-                    int.TryParse(substring, out int volume);
-                    currentValues.volume = MapTo100(volume);
-                    volumeFound = true;
-                    //Console.WriteLine(currentValues.volume);
+                    // If volume was not changed by remote
+                    if (currentValues.volume == prevValues.volume)
+                    {
+                        // Parse volume
+                        //Console.WriteLine(line);
+                        int start = line.IndexOf(':') + 2;
+                        int end = line.LastIndexOf(" )");
+                        string substring = line.Substring(start, end - start);
+                        //Console.WriteLine(substring);
+                        int.TryParse(substring, out int volume);
+                        currentValues.volume = MapTo100(volume);
+                        volumeFound = true;
+                        //Console.WriteLine(currentValues.volume);
+                    }
                 } else if (line.Contains("state"))
                 {
                     // Parse play status
@@ -203,7 +207,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
             }
 
             // Send updated data to remote
-            if ((currentValues.volume != prevValues.volume) || !volumeFound) { toSend.Add(new Command("VOLUME", currentValues.volume)); }
+            if ((currentValues.volume != prevValues.volume) || !volumeFound) { toSend.Add(new Command("VOLUME", (int)currentValues.volume)); }
             if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command("STATUS", (int)currentValues.playStatus)); }
             if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command("TIME", currentValues.playbackPos)); }
 
@@ -215,9 +219,9 @@ namespace CompanionApplication.ApplicationMedia.VLC
         /// </summary>
         /// <param name="input">256=100% volume</param>
         /// <returns>Volume mapped to 0 - 100%</returns>
-        private int MapTo100(int input)
+        private int MapTo100(float input)
         {
-            return (int)(input * (100f / 256f));
+            return (int)Math.Round(input * (100f / 256f));
         }
 
         /// <summary>
@@ -225,9 +229,9 @@ namespace CompanionApplication.ApplicationMedia.VLC
         /// </summary>
         /// <param name="input">256=100% volume</param>
         /// <returns>Volume mapped to 0 - 256</returns>
-        private int MapTo256(int input)
+        private float MapTo256(float input)
         {
-            return (int)(input / (100f / 256f));
+            return (input * 2.56f);
         }
 
         /// <summary>

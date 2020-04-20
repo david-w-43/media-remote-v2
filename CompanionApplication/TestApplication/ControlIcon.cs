@@ -95,6 +95,7 @@ namespace CompanionApplication
             // Hide tray icon, otherwise it will remain shown until user mouses over it
             trayIcon.Visible = false;
 
+            commandHandler.Disconnect();
             richPresence.Dispose();
 
             Application.Exit();

@@ -18,6 +18,8 @@
 #define ENCODER_OPTIMIZE_INTERRUPTS
 #include <Encoder.h>
 
+#define SERIAL_RX_BUFFER_SIZE=256
+
 // Pin definitions ------------------------------------------------------------------------
 
 // Encoder

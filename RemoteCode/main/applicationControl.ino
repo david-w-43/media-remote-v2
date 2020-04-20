@@ -56,7 +56,7 @@ void DisplayApplicationControl() {
   //  currentValues.repeatMode = ALL;
   //  currentValues.shuffle = true;
   // End example values -------------------------------
-  if (applicationConnected || !Serial) {
+  if (applicationConnected) {
 
     // Find difference in encoder value, send as change in volume
     int encoderValue = enc.read();

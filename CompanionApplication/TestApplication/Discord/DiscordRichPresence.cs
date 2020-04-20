@@ -134,7 +134,7 @@ namespace CompanionApplication.Discord
         /// </summary>
         public void Dispose()
         {
-            if (client != null)
+            if (!IsDisposed())
             {
                 client.ClearPresence();
                 client.Dispose();

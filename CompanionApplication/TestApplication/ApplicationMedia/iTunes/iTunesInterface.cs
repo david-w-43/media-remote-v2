@@ -23,11 +23,32 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
             application = new iTunesApp();
 
+            //application.OnPlayerPlayEvent += PlayEventHandler;
+            //application.OnSoundVolumeChangedEvent += VolumeChangedHandler;
+            //application.OnAboutToPromptUserToQuitEvent += Disconnect;
+
             updateTimer.Elapsed += UpdateInformation;
             updateTimer.Start();
 
             remoteConnection.Send(new Command("CONNECTED", true));
         }
+
+        //private void VolumeChangedHandler(int newVolume)
+        //{
+        //    Console.WriteLine("Volume " + newVolume);
+        //}
+
+        //private void PlayEventHandler(object iTrack)
+        //{
+        //    //Console.WriteLine("Play");
+        //    IITTrack currentTrack = (IITTrack)iTrack;
+        //    //Console.WriteLine(track.Name);
+
+        //    currentValues.title = currentTrack.Name;
+        //    currentValues.artist = currentTrack.Artist;
+        //    currentValues.album = currentTrack.Album;
+        //    currentValues.trackLength = currentTrack.Duration;
+        //}
 
         protected override void UpdateInformation(object sender, ElapsedEventArgs e)
         {
@@ -63,7 +84,6 @@ namespace CompanionApplication.ApplicationMedia.iTunes
                 currentValues.playbackPos = application.PlayerPosition;
                 currentValues.volume = application.SoundVolume;
                 currentValues.shuffle = application.CurrentPlaylist.Shuffle;
-                currentValues.filepath = application.CurrentStreamURL;
 
                 // Convert iTunes repeat mode enum
                 switch (application.CurrentPlaylist.SongRepeat)
@@ -98,7 +118,7 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             if (((currentValues.album != prevValues.album)) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
 
             // Send updated data to remote
-            if ((currentValues.volume != prevValues.volume)) { toSend.Add(new Command("VOLUME", currentValues.volume)); }
+            if ((currentValues.volume != prevValues.volume)) { toSend.Add(new Command("VOLUME", (int)currentValues.volume)); }
             if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command("STATUS", (int)currentValues.playStatus)); }
             if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command("TIME", currentValues.playbackPos)); }
 
@@ -116,7 +136,6 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
             // Send data to remote
             PushUpdate(toSend);
-
         }
 
         public override void Next() { application.NextTrack(); }
@@ -156,9 +175,22 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             remoteConnection.Send(new Command("CONNECTED", false));
 
             updateTimer.Stop();
-            // Stop playback
-            application.Stop();
+
+            try
+            {
+                // Pause playback
+                application.Pause();
+
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(application);
+                System.GC.Collect();
+            }
+            catch (System.Runtime.InteropServices.InvalidComObjectException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
             richPresence.Dispose();
+
         }
     }
 }

@@ -242,13 +242,21 @@ namespace CompanionApplication
         /// <param name="value">String to send</param>
         public void Send(Command command) {
             // Send Data
-            serialPort.WriteLine(command.Format());
+            if (serialPort.IsOpen)
+            {
+                serialPort.WriteLine(command.Format());
 
-            // Add data to cache
-            sentCache.Add(command);
+                // Add data to cache
+                sentCache.Add(command);
 
-            // Write to console with timestamp
-            Console.WriteLine(DateTime.Now.Second + "." + DateTime.Now.Millisecond + ": " + command.Format());
+                // Write to console with timestamp
+                Console.WriteLine(DateTime.Now.Second + "." + DateTime.Now.Millisecond + ": " + command.Format());
+            }
+            else
+            {
+                Console.WriteLine("Serial port closed");
+            }
+            
         }
 
         /// <summary>
@@ -329,6 +337,12 @@ namespace CompanionApplication
             if (settings.DisplayAlbum) { val = 1; } else { val = 0; }
             //Send("UPDALBUM(" + val + ")");
             Send(new Command("UPDALBUM", val));
+        }
+
+        public void Disconnect()
+        {
+            serialPort.Dispose();
+
         }
     }
 }
