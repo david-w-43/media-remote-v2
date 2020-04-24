@@ -14,7 +14,7 @@ namespace CompanionApplication
         public CommandHandler commandHandler;
         private Discord.DiscordRichPresence richPresence;
 
-        private MenuItem VLCSwitch, iTunesSwitch;
+        private MenuItem VLCSwitch, iTunesSwitch, clockSwitch, systemSwitch;
         private MenuItem DVOff, DVFull, DVLimited;
 
         /// <summary>
@@ -28,45 +28,108 @@ namespace CompanionApplication
                 Icon = Properties.Resources.display,
                 ContextMenu = new ContextMenu(new MenuItem[] {
 
-                new MenuItem("Settings", OpenSettings), // Opens the settings form
-                new MenuItem("-"), // Separator
-                new MenuItem("Backlight", new MenuItem[]
-                {
-                    new MenuItem("100%", SetBacklight) { RadioCheck = true },
-                    new MenuItem("80%", SetBacklight) { RadioCheck = true },
-                    new MenuItem("60%", SetBacklight) { RadioCheck = true },
-                    new MenuItem("40%", SetBacklight) { RadioCheck = true },
-                    new MenuItem("20%", SetBacklight) { RadioCheck = true },
-                    new MenuItem("10%", SetBacklight) { RadioCheck = true }
+                    new MenuItem("Settings", OpenSettings), // Opens the settings form
+                    new MenuItem("-"), // Separator
+                    new MenuItem("Backlight", new MenuItem[]
+                    {
+                        new MenuItem("100%", SetBacklight) { RadioCheck = true },
+                        new MenuItem("80%", SetBacklight) { RadioCheck = true },
+                        new MenuItem("60%", SetBacklight) { RadioCheck = true },
+                        new MenuItem("40%", SetBacklight) { RadioCheck = true },
+                        new MenuItem("20%", SetBacklight) { RadioCheck = true },
+                        new MenuItem("10%", SetBacklight) { RadioCheck = true }
+                    }),
+                    new MenuItem("-"), // Separator
+                    new MenuItem("Discord", new MenuItem[]
+                    {
+                        DVFull = new MenuItem("Full", SetDiscordVerbosity) { RadioCheck = true },
+                        DVLimited = new MenuItem("Limited", SetDiscordVerbosity) { RadioCheck = true },
+                        DVOff = new MenuItem("Off", SetDiscordVerbosity) { RadioCheck = true },
+                    }),
+                    new MenuItem("-"), // Separator
+                    //VLCSwitch = new MenuItem("VLC", MediaApplicationChange) { RadioCheck = true },
+                    //iTunesSwitch = new MenuItem("iTunes", MediaApplicationChange) { RadioCheck = true },
+
+                    clockSwitch = new MenuItem("Clock", SetMode) {RadioCheck = true },
+                    iTunesSwitch = new MenuItem("iTunes", SetMode) {RadioCheck = true },
+                    VLCSwitch = new MenuItem("VLC", SetMode) {RadioCheck = true },
+                    systemSwitch = new MenuItem("System", SetMode) {RadioCheck = true },
+
+                    new MenuItem("-"), // Separator
+                    new MenuItem("Exit", Exit), // Exits application
                 }),
-                new MenuItem("-"), // Separator
-                new MenuItem("Discord", new MenuItem[]
-                {
-                    DVFull = new MenuItem("Full", SetDiscordVerbosity) { RadioCheck = true },
-                    DVLimited = new MenuItem("Limited", SetDiscordVerbosity) { RadioCheck = true },
-                    DVOff = new MenuItem("Off", SetDiscordVerbosity) { RadioCheck = true },
-                }),
-                new MenuItem("-"), // Separator
-                VLCSwitch = new MenuItem("VLC", MediaApplicationChange) { RadioCheck = true },
-                iTunesSwitch = new MenuItem("iTunes", MediaApplicationChange) { RadioCheck = true },
-                new MenuItem("-"), // Separator
-                new MenuItem("Exit", Exit), // Exits application
-            }),
                 Visible = true
             };
 
-            if ((ApplicationMedia.Interface)Properties.Settings.Default.ApplicationMediaInterface 
-                == ApplicationMedia.Interface.VLC)
+            trayIcon.ContextMenu.Popup += UpdateValues;
+
+
+            //if ((ApplicationMedia.Interface)Properties.Settings.Default.ApplicationMediaInterface 
+            //    == ApplicationMedia.Interface.VLC)
+            //{
+            //    VLCSwitch.Checked = true;
+            //    iTunesSwitch.Checked = false;
+            //}
+            //else
+            //{
+            //    VLCSwitch.Checked = false;
+            //    iTunesSwitch.Checked = true;
+            //}
+
+            //switch ((Discord.DiscordVerbosity)Properties.Settings.Default.DiscordRPVerbosity)
+            //{
+            //    case Discord.DiscordVerbosity.off:
+            //        DVOff.Checked = true;
+            //        break;
+            //    case Discord.DiscordVerbosity.full:
+            //        DVFull.Checked = true;
+            //        break;
+            //    case Discord.DiscordVerbosity.limited:
+            //        DVLimited.Checked = true;
+            //        break;
+            //}
+
+            // Create new connection, remote and SAC
+            richPresence = new Discord.DiscordRichPresence();
+            connection = new RemoteConnection(ref commandHandler, ref richPresence);
+        }
+
+        /// <summary>
+        /// Updates values when opened
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdateValues(object sender, EventArgs e)
+        {
+            // Update mode
+            DeviceMode mode = commandHandler.GetDeviceMode();
+
+            // Set all to unchecked
+            clockSwitch.Checked = iTunesSwitch.Checked = VLCSwitch.Checked = systemSwitch.Checked = false;
+
+            // Set appropriate checkbox
+            switch (mode)
             {
-                VLCSwitch.Checked = true;
-                iTunesSwitch.Checked = false;
-            }
-            else
-            {
-                VLCSwitch.Checked = false;
-                iTunesSwitch.Checked = true;
+                case DeviceMode.Clock:
+                    clockSwitch.Checked = true;
+                    break;
+                case DeviceMode.ApplicationControl:
+                    switch ((ApplicationMedia.Interface)Properties.Settings.Default.ApplicationMediaInterface)
+                    {
+                        case ApplicationMedia.Interface.VLC:
+                            VLCSwitch.Checked = true;
+                            break;
+                        case ApplicationMedia.Interface.iTunes:
+                            iTunesSwitch.Checked = true;
+                            break;
+                    }
+                    break;
+                case DeviceMode.SystemMedia:
+                    systemSwitch.Checked = true;
+                    break;
             }
 
+            // Update Discord RP verbosity
             switch ((Discord.DiscordVerbosity)Properties.Settings.Default.DiscordRPVerbosity)
             {
                 case Discord.DiscordVerbosity.off:
@@ -79,10 +142,6 @@ namespace CompanionApplication
                     DVLimited.Checked = true;
                     break;
             }
-
-            // Create new connection, remote and SAC
-            richPresence = new Discord.DiscordRichPresence();
-            connection = new RemoteConnection(ref commandHandler, ref richPresence);
         }
 
         /// <summary>
@@ -103,7 +162,7 @@ namespace CompanionApplication
 
         void OpenSettings(object sender, EventArgs e)
         {
-            Settings settingsForm = new Settings();
+            Settings settingsForm = new Settings(ref connection);
             DialogResult result = settingsForm.ShowDialog();
             // If user pressed OK
             if (result == DialogResult.OK)
@@ -113,30 +172,62 @@ namespace CompanionApplication
             }
         }
 
-        void MediaApplicationChange(object sender, EventArgs e)
+        //void MediaApplicationChange(object sender, EventArgs e)
+        //{
+        //    // Change settings and 
+        //    if (sender == VLCSwitch && !VLCSwitch.Checked)
+        //    {
+        //        VLCSwitch.Checked = true;
+        //        iTunesSwitch.Checked = false;
+        //        Properties.Settings.Default.ApplicationMediaInterface = 0;
+        //    }
+        //    else if (sender == iTunesSwitch && !iTunesSwitch.Checked)
+        //    {
+        //        VLCSwitch.Checked = false;
+        //        iTunesSwitch.Checked = true;
+        //        Properties.Settings.Default.ApplicationMediaInterface = 1;
+        //    }
+
+        //    Properties.Settings.Default.Save();
+
+        //    DeviceMode mode = commandHandler.GetDeviceMode();
+        //    if (mode == DeviceMode.ApplicationControl)
+        //    {
+        //        // Restart application with new applicaiton
+        //        //Application.Restart();
+        //        commandHandler.RefreshApplication();
+        //    }
+        //}
+
+        void SetMode(object sender, EventArgs e)
         {
-            // Change settings and 
-            if (sender == VLCSwitch && !VLCSwitch.Checked)
+            // Uncheck all menuitems and check sender
+            foreach (MenuItem item in ((MenuItem)sender).Parent.MenuItems)
             {
-                VLCSwitch.Checked = true;
-                iTunesSwitch.Checked = false;
-                Properties.Settings.Default.ApplicationMediaInterface = 0;
+                item.Checked = false;
             }
-            else if (sender == iTunesSwitch && !iTunesSwitch.Checked)
-            {
-                VLCSwitch.Checked = false;
-                iTunesSwitch.Checked = true;
-                Properties.Settings.Default.ApplicationMediaInterface = 1;
-            }
+            ((MenuItem)sender).Checked = true;
 
-            Properties.Settings.Default.Save();
-
-            DeviceMode mode = commandHandler.GetDeviceMode();
-            if (mode == DeviceMode.ApplicationControl)
+            switch (((MenuItem)sender).Text)
             {
-                // Restart application with new applicaiton
-                //Application.Restart();
-                commandHandler.RefreshApplication();
+                case "VLC":
+                    Properties.Settings.Default.ApplicationMediaInterface = 0;
+                    Properties.Settings.Default.Save();
+                    commandHandler.ModeSwitch(DeviceMode.ApplicationControl);
+                    //commandHandler.RefreshApplication();
+                    break;
+                case "iTunes":
+                    Properties.Settings.Default.ApplicationMediaInterface = 1;
+                    Properties.Settings.Default.Save();
+                    commandHandler.ModeSwitch(DeviceMode.ApplicationControl);
+                    //commandHandler.RefreshApplication();
+                    break;
+                case "System":
+                    commandHandler.ModeSwitch(DeviceMode.SystemMedia);
+                    break;
+                case "Clock":
+                    commandHandler.ModeSwitch(DeviceMode.Clock);
+                    break;
             }
         }
 

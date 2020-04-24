@@ -190,7 +190,6 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             }
 
             richPresence.Dispose();
-
         }
     }
 }

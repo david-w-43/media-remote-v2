@@ -34,18 +34,29 @@ namespace CompanionApplication
         // Changes device mode
         public void ModeSwitch(DeviceMode mode)
         {
+            remoteConnection.Send(new Command("MODESET", (int)mode));
+
             deviceMode = mode;
             switch (mode)
             {
                 case DeviceMode.Clock:
                     Console.WriteLine("Clock mode");
+                    // Disconnect if not null
+                    if (applicationInterface != null)
+                    {
+                        applicationInterface.Disconnect();
+                        applicationInterface = null;
+                    }
                     break;
                 case DeviceMode.ApplicationControl:
                     Console.WriteLine("Application control mode");
 
                     // Disconnect if not null
-                    //if (applicationInterface != null) { applicationInterface.Finalize(); }
-                    applicationInterface = null;
+                    if (applicationInterface != null) {
+                        applicationInterface.Disconnect();
+                        applicationInterface = null;
+                    }
+                    
 
                     // Instantiate appropriate connection
                     switch ((Interface)Properties.Settings.Default.ApplicationMediaInterface)
@@ -73,6 +84,7 @@ namespace CompanionApplication
                     break;
                 case DeviceMode.SystemMedia:
                     Console.WriteLine("Media mode");
+                    applicationInterface = null;
                     break;
                 case DeviceMode.Menu:
                     Console.WriteLine("Menu mode");
@@ -132,20 +144,20 @@ namespace CompanionApplication
             }
         }
 
-        public void RefreshApplication()
-        {
-            applicationInterface.Disconnect();
-            switch ((Interface)Properties.Settings.Default.ApplicationMediaInterface)
-            {
-                case Interface.VLC:
-                    applicationInterface = new ApplicationMedia.VLC.Interface(ref remoteConnection, ref richPresence);
-                    break;
-                case Interface.iTunes:
-                    applicationInterface = new ApplicationMedia.iTunes.Interface(ref remoteConnection, ref richPresence);
-                    break;
-            }
+        //public void RefreshApplication()
+        //{
+        //    applicationInterface.Disconnect();
+        //    switch ((Interface)Properties.Settings.Default.ApplicationMediaInterface)
+        //    {
+        //        case Interface.VLC:
+        //            applicationInterface = new ApplicationMedia.VLC.Interface(ref remoteConnection, ref richPresence);
+        //            break;
+        //        case Interface.iTunes:
+        //            applicationInterface = new ApplicationMedia.iTunes.Interface(ref remoteConnection, ref richPresence);
+        //            break;
+        //    }
             
-        }
+        //}
 
         public void Disconnect()
         {
