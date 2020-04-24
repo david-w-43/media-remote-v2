@@ -40,6 +40,8 @@
             this.radioGroup = new System.Windows.Forms.GroupBox();
             this.radioAlbum = new System.Windows.Forms.RadioButton();
             this.radioArtist = new System.Windows.Forms.RadioButton();
+            this.checkBoxScroll = new System.Windows.Forms.CheckBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.tableButtons = new System.Windows.Forms.TableLayoutPanel();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -48,13 +50,13 @@
             this.tabPageDevice = new System.Windows.Forms.TabPage();
             this.tabPageVLC = new System.Windows.Forms.TabPage();
             this.tabPageMedia = new System.Windows.Forms.TabPage();
-            this.label2 = new System.Windows.Forms.Label();
-            this.checkBoxScroll = new System.Windows.Forms.CheckBox();
+            this.btnClockSync = new System.Windows.Forms.Button();
             this.tableVLCControls.SuspendLayout();
             this.radioGroup.SuspendLayout();
             this.tableButtons.SuspendLayout();
             this.tableLayoutPanelTabs.SuspendLayout();
             this.tabControlSettings.SuspendLayout();
+            this.tabPageDevice.SuspendLayout();
             this.tabPageVLC.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -188,6 +190,25 @@
             this.radioArtist.Text = "Artist";
             this.radioArtist.UseVisualStyleBackColor = true;
             // 
+            // checkBoxScroll
+            // 
+            this.checkBoxScroll.AutoSize = true;
+            this.checkBoxScroll.Location = new System.Drawing.Point(110, 217);
+            this.checkBoxScroll.Name = "checkBoxScroll";
+            this.checkBoxScroll.Size = new System.Drawing.Size(15, 14);
+            this.checkBoxScroll.TabIndex = 5;
+            this.checkBoxScroll.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(25, 214);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(79, 13);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Scroll long text:";
+            // 
             // tableButtons
             // 
             this.tableButtons.ColumnCount = 2;
@@ -257,6 +278,7 @@
             // 
             // tabPageDevice
             // 
+            this.tabPageDevice.Controls.Add(this.btnClockSync);
             this.tabPageDevice.Location = new System.Drawing.Point(4, 22);
             this.tabPageDevice.Name = "tabPageDevice";
             this.tabPageDevice.Padding = new System.Windows.Forms.Padding(3);
@@ -286,24 +308,15 @@
             this.tabPageMedia.Text = "System Media";
             this.tabPageMedia.UseVisualStyleBackColor = true;
             // 
-            // label2
+            // btnClockSync
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(25, 214);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(79, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Scroll long text:";
-            // 
-            // checkBoxScroll
-            // 
-            this.checkBoxScroll.AutoSize = true;
-            this.checkBoxScroll.Location = new System.Drawing.Point(110, 217);
-            this.checkBoxScroll.Name = "checkBoxScroll";
-            this.checkBoxScroll.Size = new System.Drawing.Size(15, 14);
-            this.checkBoxScroll.TabIndex = 5;
-            this.checkBoxScroll.UseVisualStyleBackColor = true;
+            this.btnClockSync.Location = new System.Drawing.Point(122, 67);
+            this.btnClockSync.Name = "btnClockSync";
+            this.btnClockSync.Size = new System.Drawing.Size(159, 23);
+            this.btnClockSync.TabIndex = 0;
+            this.btnClockSync.Text = "Synchronise Clock";
+            this.btnClockSync.UseVisualStyleBackColor = true;
+            this.btnClockSync.Click += new System.EventHandler(this.btnClockSync_Click);
             // 
             // Settings
             // 
@@ -326,6 +339,7 @@
             this.tableButtons.ResumeLayout(false);
             this.tableLayoutPanelTabs.ResumeLayout(false);
             this.tabControlSettings.ResumeLayout(false);
+            this.tabPageDevice.ResumeLayout(false);
             this.tabPageVLC.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -354,5 +368,6 @@
         private System.Windows.Forms.TabPage tabPageMedia;
         private System.Windows.Forms.CheckBox checkBoxScroll;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btnClockSync;
     }
 }

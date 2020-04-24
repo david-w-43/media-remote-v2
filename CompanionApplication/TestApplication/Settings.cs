@@ -12,9 +12,11 @@ namespace CompanionApplication
 {
     public partial class Settings : Form
     {
-        public Settings()
+        RemoteConnection remoteConnection;
+        public Settings(ref RemoteConnection remoteConnection)
         {
             InitializeComponent();
+            this.remoteConnection = remoteConnection;
         }
 
         private void Settings_Load(object sender, EventArgs e)
@@ -83,6 +85,20 @@ namespace CompanionApplication
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
+        }
+
+        private void btnClockSync_Click(object sender, EventArgs e)
+        {
+            DateTime t = DateTime.Now;
+
+            // Chip uses 2-digit year
+            int year = t.Year - 2000;
+
+            string timeString = t.Second.ToString() + '|' + t.Minute.ToString() + '|' + t.Hour.ToString() +
+                '|' + ((int)t.DayOfWeek).ToString() + '|' + t.Day.ToString() + '|' + t.Month.ToString() +
+                '|' + year.ToString();
+
+            remoteConnection.Send(new Command("UPDTIME", timeString));
         }
     }
 }
