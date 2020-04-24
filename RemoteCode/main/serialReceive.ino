@@ -34,6 +34,9 @@ void serialEvent() {
       } else if (identifier == "MODEQUERY") {
         // Report the current device mode
         Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
+      } else if (identifier == "MODESET") {
+        // Switch to appropriate mode
+        deviceMode = (DeviceMode)parameter.toInt();
       }
 
       // Commands that update device settings
@@ -60,6 +63,18 @@ void serialEvent() {
           deviceOptions.brightness = level;
           SetBacklight(level);
         }
+        else if (identifier == "UPDTIME"){
+          byte second = (byte)(getParameter(parameter, '|', 0).toInt());
+          byte minute = (byte)(getParameter(parameter, '|', 1).toInt());
+          byte hour = (byte)(getParameter(parameter, '|', 2).toInt());
+          byte dayOfWeek = (byte)(getParameter(parameter, '|', 3).toInt());
+          byte dayOfMonth = (byte)(getParameter(parameter, '|', 4).toInt());
+          byte month = (byte)(getParameter(parameter, '|', 5).toInt());
+          byte year  = (byte)(getParameter(parameter, '|', 6).toInt());
+
+          // Sets the time on the RTC
+          rtc.setDateTime(second, minute, hour, dayOfWeek, dayOfMonth, month, year);
+        }  
 
         // Update EEPROM
         EEPROM.put(EEPROM_OPTIONS, deviceOptions);

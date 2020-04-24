@@ -1,3 +1,6 @@
+// RTC library
+#include <MCP7941x.h>
+
 // Serial buffer size should be set to 256 bytes
 
 // Permanent storage
@@ -25,10 +28,10 @@
 // Encoder
 #define ENC1 10
 #define ENC2 11
-#define ENC_SW 19
+#define ENC_SW A4
 
 // BS18B20 data is connected to digital pin 5
-#define ONE_WIRE_BUS A6
+#define ONE_WIRE_BUS A5
 #define ONE_WIRE_ADDRESS 0
 #define READING_RESOLUTION 9
 
@@ -36,22 +39,22 @@
 #define LCD_RS 4 //4 // Chip select
 #define LCD_RW 5 //5 // Data
 #define LCD_E 7 //6 // Clock
-#define LCD_RESET 13
+#define LCD_RESET 1
 
 // LCD backlight PWM pin
 #define LCD_BACKLIGHT 3 // OC0A
 
 // Momentary switches
-#define BTN_A 23
-#define BTN_B 22
-#define BTN_C 21
-#define BTN_D 20
+#define BTN_A A0
+#define BTN_B A1
+#define BTN_C A2
+#define BTN_D A3
 
 // Object definitions ---------------------------------------------------------------------
 
 // LCD constructor (rotation, Clock, data, chip select, reset)
 // Using full frame buffer
-U8G2_ST7920_128X64_F_SW_SPI lcd(U8G2_R2, LCD_E, LCD_RW, LCD_RS, LCD_RESET);
+U8G2_ST7920_128X64_F_SW_SPI lcd(U8G2_R0, LCD_E, LCD_RW, LCD_RS, LCD_RESET);
 
 // Create oneWire instance
 OneWire oneWire(ONE_WIRE_BUS);
@@ -59,6 +62,9 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 // Address of the sensor
 DeviceAddress tempSensor = {0x28, 0x02, 0x00, 0x07, 0xFE, 0xA1, 0x01, 0xFB};
+
+// Initialise RTC object
+MCP7941x rtc = MCP7941x();
 
 // Defines button objects
 Button btnA(BTN_A);
@@ -182,6 +188,10 @@ void setup() {
   EEPROM.get(EEPROM_OPTIONS, deviceOptions);
   SetBacklight(deviceOptions.brightness);
 
+  // Start rtc clock if not already started
+  rtc.enableClock();
+  rtc.enableBattery();
+
   // Starts communication with LCD
   delay(200);
   lcd.begin();
@@ -226,41 +236,43 @@ void loop() {
   bool D = btnD.read();
   bool E = btnENC.read();
 
-  // Gets whether or not A or D is newly long pressed
-  if (btnA.pressedFor(LONG_PRESS) && !prevlongA ) {
-    longA = true;
-    prevlongA = true;
-  }
-  if (btnD.pressedFor(LONG_PRESS) && !prevlongD ) {
-    longD = true;
-    prevlongD = true;
-  }
-  if ( btnA.wasReleased() ) {
-    prevlongA = false;
-  }
-  if ( btnD.wasReleased() ) {
-    prevlongD = false;
-  }
+  if (deviceMode )
 
-  // If A or D was long pressed, go to next/prev mode
-  if ( longA ) {
-    longA = false;
-    if (deviceMode != 0) { // Decrement device mode
-      deviceMode = (DeviceMode)((int)deviceMode - 1);
-    } else {
-      deviceMode = (DeviceMode)3; // Wrap around
-    }
-    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
-  }
-  else if ( longD ) {
-    longD = false;
-    if (deviceMode != 3) { // Increment device mode
-      deviceMode = (DeviceMode)((int)deviceMode + 1);
-    } else {
-      deviceMode = (DeviceMode)0; // Wrap around
-    }
-    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
-  }
+//  // Gets whether or not A or D is newly long pressed
+//  if (btnA.pressedFor(LONG_PRESS) && !prevlongA ) {
+//    longA = true;
+//    prevlongA = true;
+//  }
+//  if (btnD.pressedFor(LONG_PRESS) && !prevlongD ) {
+//    longD = true;
+//    prevlongD = true;
+//  }
+//  if ( btnA.wasReleased() ) {
+//    prevlongA = false;
+//  }
+//  if ( btnD.wasReleased() ) {
+//    prevlongD = false;
+//  }
+//
+//  // If A or D was long pressed, go to next/prev mode
+//  if ( longA ) {
+//    longA = false;
+//    if (deviceMode != 0) { // Decrement device mode
+//      deviceMode = (DeviceMode)((int)deviceMode - 1);
+//    } else {
+//      deviceMode = (DeviceMode)3; // Wrap around
+//    }
+//    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
+//  }
+//  else if ( longD ) {
+//    longD = false;
+//    if (deviceMode != 3) { // Increment device mode
+//      deviceMode = (DeviceMode)((int)deviceMode + 1);
+//    } else {
+//      deviceMode = (DeviceMode)0; // Wrap around
+//    }
+//    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
+//  }
 
   // Behaviour depends on the current mode
   switch (deviceMode) {
