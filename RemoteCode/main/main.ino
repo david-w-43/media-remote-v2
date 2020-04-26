@@ -160,6 +160,9 @@ DeviceOptions deviceOptions;
 // Stores the previous encoder value so that the change may be found
 int prevEncoderVal;
 
+// True if companion application connected
+bool companionConnected;
+
 // Setup ----------------------------------------------------------------------------------
 void setup() {
   // Using pin 7 for encoder click
@@ -236,43 +239,43 @@ void loop() {
   bool D = btnD.read();
   bool E = btnENC.read();
 
-  if (deviceMode )
+  //if (deviceMode )
 
-//  // Gets whether or not A or D is newly long pressed
-//  if (btnA.pressedFor(LONG_PRESS) && !prevlongA ) {
-//    longA = true;
-//    prevlongA = true;
-//  }
-//  if (btnD.pressedFor(LONG_PRESS) && !prevlongD ) {
-//    longD = true;
-//    prevlongD = true;
-//  }
-//  if ( btnA.wasReleased() ) {
-//    prevlongA = false;
-//  }
-//  if ( btnD.wasReleased() ) {
-//    prevlongD = false;
-//  }
-//
-//  // If A or D was long pressed, go to next/prev mode
-//  if ( longA ) {
-//    longA = false;
-//    if (deviceMode != 0) { // Decrement device mode
-//      deviceMode = (DeviceMode)((int)deviceMode - 1);
-//    } else {
-//      deviceMode = (DeviceMode)3; // Wrap around
-//    }
-//    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
-//  }
-//  else if ( longD ) {
-//    longD = false;
-//    if (deviceMode != 3) { // Increment device mode
-//      deviceMode = (DeviceMode)((int)deviceMode + 1);
-//    } else {
-//      deviceMode = (DeviceMode)0; // Wrap around
-//    }
-//    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
-//  }
+  //  // Gets whether or not A or D is newly long pressed
+  //  if (btnA.pressedFor(LONG_PRESS) && !prevlongA ) {
+  //    longA = true;
+  //    prevlongA = true;
+  //  }
+  //  if (btnD.pressedFor(LONG_PRESS) && !prevlongD ) {
+  //    longD = true;
+  //    prevlongD = true;
+  //  }
+  //  if ( btnA.wasReleased() ) {
+  //    prevlongA = false;
+  //  }
+  //  if ( btnD.wasReleased() ) {
+  //    prevlongD = false;
+  //  }
+  //
+  //  // If A or D was long pressed, go to next/prev mode
+  //  if ( longA ) {
+  //    longA = false;
+  //    if (deviceMode != 0) { // Decrement device mode
+  //      deviceMode = (DeviceMode)((int)deviceMode - 1);
+  //    } else {
+  //      deviceMode = (DeviceMode)3; // Wrap around
+  //    }
+  //    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
+  //  }
+  //  else if ( longD ) {
+  //    longD = false;
+  //    if (deviceMode != 3) { // Increment device mode
+  //      deviceMode = (DeviceMode)((int)deviceMode + 1);
+  //    } else {
+  //      deviceMode = (DeviceMode)0; // Wrap around
+  //    }
+  //    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
+  //  }
 
   // Behaviour depends on the current mode
   switch (deviceMode) {
@@ -289,6 +292,7 @@ void loop() {
       DisplayMenu();
       break;
   }
+  //}
 
   //  int encoderValue = GetEncoderValue();
   //  //Serial.println(encoderValue);
@@ -396,5 +400,5 @@ void SetBacklight(int level) {
 // SetContrast -------------------------------------------------------------------------
 // Sets contrast level
 void SetContrast(int level) {
-  
+
 }

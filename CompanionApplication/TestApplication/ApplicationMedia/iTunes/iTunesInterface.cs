@@ -30,7 +30,7 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             updateTimer.Elapsed += UpdateInformation;
             updateTimer.Start();
 
-            remoteConnection.Send(new Command("CONNECTED", true));
+            remoteConnection.Send(new Command("PLAYING", true));
         }
 
         //private void VolumeChangedHandler(int newVolume)
@@ -73,8 +73,8 @@ namespace CompanionApplication.ApplicationMedia.iTunes
                     break;
             }
 
-            if (state != ITPlayerState.ITPlayerStateStopped)
-            {
+            //if (state != ITPlayerState.ITPlayerStateStopped)
+            //{
                 // Grab values
                 currentValues.title = currentTrack.Name;
                 currentValues.artist = currentTrack.Artist;
@@ -98,7 +98,7 @@ namespace CompanionApplication.ApplicationMedia.iTunes
                         currentValues.repeatMode = RepeatMode.all;
                         break;
                 }
-            }
+            //}
             // If values have changed, update remote display
             if (!Equals(currentValues, prevValues)) { UpdateRemote(); }
         }
@@ -172,7 +172,7 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
         public override void Disconnect()
         {
-            remoteConnection.Send(new Command("CONNECTED", false));
+            remoteConnection.Send(new Command("PLAYING", false));
 
             updateTimer.Stop();
 

@@ -37,7 +37,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
                 // Connect to socket
                 client.ConnectToServer(hostname, port);
 
-                remoteConnection.Send(new Command("CONNECTED", true));
+                remoteConnection.Send(new Command("PLAYING", true));
 
                 // Initialise values, these cannot be read from VLC console
                 Shuffle(false);
@@ -339,7 +339,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
 
         public override void Disconnect()
         {
-            remoteConnection.Send(new Command("CONNECTED", false));
+            remoteConnection.Send(new Command("PLAYING", false));
 
             updateTimer.Stop();
             // Stop playback

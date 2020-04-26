@@ -37,6 +37,17 @@ void serialEvent() {
       } else if (identifier == "MODESET") {
         // Switch to appropriate mode
         deviceMode = (DeviceMode)parameter.toInt();
+      } else if (identifier == "CONNECTED") {
+        if (parameter == "1"){
+          companionConnected = true;
+        } else {
+          companionConnected = false;
+          // Clock mode on disconnect
+          deviceMode = Clock;
+        }
+      } else if (identifier == "PLAYING") {
+        if (parameter == "1" ) {applicationPlaying = true; }
+        else { applicationPlaying = false; }
       }
 
       // Commands that update device settings
@@ -111,12 +122,12 @@ void ApplicationControlCommands(String identifier, String parameter) {
   // Nothing yet
   if (identifier == "TIME") {
     currentValues.playbackPos = parameter.toInt();
-  } else if (identifier == "CONNECTED") {
+  } else if (identifier == "PLAYING") {
     if (parameter == "1") {
-      applicationConnected = true;
+      applicationPlaying = true;
     }
     else {
-      applicationConnected = false;
+      applicationPlaying = false;
     }
   }
   else if (identifier == "VOLUME") {

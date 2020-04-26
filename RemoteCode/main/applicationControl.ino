@@ -43,7 +43,7 @@ struct Values {
 };
 
 Values currentValues;
-bool applicationConnected = false;
+bool applicationPlaying = false;
 
 void DisplayApplicationControl() {
   // For testing purposes -----------------------------
@@ -56,7 +56,7 @@ void DisplayApplicationControl() {
   //  currentValues.repeatMode = ALL;
   //  currentValues.shuffle = true;
   // End example values -------------------------------
-  if (applicationConnected) {
+  if (applicationPlaying) {
 
     // Find difference in encoder value, send as change in volume
     int encoderValue = enc.read();
