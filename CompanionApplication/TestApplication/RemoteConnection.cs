@@ -229,6 +229,9 @@ namespace CompanionApplication
                     settings.connectedPortName = serialPort.PortName;
                     settings.Save();
 
+                    // Indicate that remote is connected
+                    Send(new Command("CONNECTED", true));
+
                     // Request current device mode
                     Send(new Command("MODEQUERY"));
                 }
@@ -341,8 +344,9 @@ namespace CompanionApplication
 
         public void Disconnect()
         {
-            serialPort.Dispose();
+            Send(new Command("CONNECTED", false));
 
+            serialPort.Dispose();
         }
     }
 }

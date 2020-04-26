@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CompanionApplication.ApplicationMedia;
+using CompanionApplication.SystemMedia;
 
 namespace CompanionApplication
 {
@@ -15,6 +16,7 @@ namespace CompanionApplication
         
         public RemoteConnection remoteConnection;
         private ApplicationInterface applicationInterface;
+        private SystemMediaInterface systemInterface;
 
         public Discord.DiscordRichPresence richPresence;
 
@@ -85,6 +87,7 @@ namespace CompanionApplication
                 case DeviceMode.SystemMedia:
                     Console.WriteLine("Media mode");
                     applicationInterface = null;
+                    systemInterface = new SystemMediaInterface(ref remoteConnection);
                     break;
                 case DeviceMode.Menu:
                     Console.WriteLine("Menu mode");
@@ -138,6 +141,21 @@ namespace CompanionApplication
 
                     break;
                 case DeviceMode.SystemMedia:
+                    switch (identifier)
+                    {
+                        case "VOLCHANGE":
+                            //systemInterface.VolumeAdjust(int.Parse(parameter));
+                            break;
+                        case "NEXT":
+                            systemInterface.Next();
+                            break;
+                        case "PREV":
+                            systemInterface.Prev();
+                            break;
+                        case "PAUSE":
+                            systemInterface.Pause();
+                            break;
+                    }
                     break;
                 case DeviceMode.Menu:
                     break;

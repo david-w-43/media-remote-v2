@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AudioSwitcher.AudioApi;
 using AudioSwitcher.AudioApi.CoreAudio;
 
 namespace CompanionApplication.SystemMedia
@@ -15,8 +16,16 @@ namespace CompanionApplication.SystemMedia
         // Creates enumerator for all playback devices
         private List<CoreAudioDevice> devices = new CoreAudioController().GetPlaybackDevices().ToList();
 
+        CoreAudioDevice defaultDevice;
+
+        public SystemAudioController()
+        {
+            Update();
+            GetDefault();
+        }
+
         /// <summary>
-        /// Shorthand function to get the default multimedia playback device
+        /// Shorthand function to get the default multimedia playback device, very slow
         /// </summary>
         /// <returns>Default multimedia playback device</returns>
         public CoreAudioDevice GetDefault()
@@ -26,6 +35,7 @@ namespace CompanionApplication.SystemMedia
             {
                 if (device.IsDefaultDevice) { toReturn = device; }
             }
+            defaultDevice = toReturn;
             return toReturn;
         }
 
@@ -36,8 +46,11 @@ namespace CompanionApplication.SystemMedia
         public bool Update()
         {
             List<CoreAudioDevice> oldList = new List<CoreAudioDevice>(devices);
-            devices = new CoreAudioController().GetPlaybackDevices().ToList();
-            if (Object.Equals(devices, oldList)) { return false; }
+            this.devices = new CoreAudioController().GetPlaybackDevices().ToList();
+            if (Object.Equals(devices, oldList))
+            {
+                return false;
+            }
             else { return true; }
         }
 
@@ -62,9 +75,30 @@ namespace CompanionApplication.SystemMedia
         /// <returns>New volume</returns>
         public double Adjust(int change = 1)
         {
-            CoreAudioDevice defaultDevice = GetDefault();
-            defaultDevice.Volume += change;
-            return defaultDevice.Volume;
+            if ((defaultDevice != null) && (defaultDevice.State == DeviceState.Active))
+            {
+                defaultDevice.Volume += change;
+                return defaultDevice.Volume;
+            } else { return -1; }
+            
         }
+
+        //private class VolumeObserver : IObserver<AudioSwitcher.AudioApi.DeviceVolumeChangedArgs>
+        //{
+        //    public void OnCompleted()
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    public void OnError(Exception error)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    public void OnNext(DeviceVolumeChangedArgs value)
+        //    {
+        //        // Do something with value.Volume
+        //    }
+        //}
     }
 }
