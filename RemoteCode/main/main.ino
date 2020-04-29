@@ -103,7 +103,7 @@ enum DeviceMode { Clock, ApplicationControl, SystemMedia, Menu };
 // Options
 struct DeviceOptions {
   bool stringScroll;
-  bool displayAlbum;
+  //bool displayAlbum;
   int brightness;
 };
 

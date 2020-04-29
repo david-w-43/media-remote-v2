@@ -10,6 +10,26 @@ namespace CompanionApplication
 {
     public enum DeviceMode { Clock, ApplicationControl, SystemMedia, Menu };
 
+    public static class TxCommand
+    {
+        public static string ConnectionRequest = "HAND";
+        public static string Connected = "CONN";
+        public static string ModeQuery = "MDQU";
+        public static string UpdateScroll = "UPSCR";
+        public static string ModeSet = "MDST";
+        public static string SetTitle = "TITL";
+        public static string SetSubtitle = "SUBT";
+        public static string SetLength = "LEN";
+        public static string SetVolume = "VOL";
+        public static string SetStatus = "STAT";
+        public static string SetTime = "TIME";
+        public static string SetShuffle = "SHUFF";
+        public static string SetRepeatMode = "RPTM";
+        public static string SetMediaAppConnected = "APPC";
+        public static string SetRTCTime = "UPTIM";
+        public static string SetBrightness = "UPBCK";
+    }
+
     public class CommandHandler
     {
         public const char separator = (char)0x7c;
@@ -36,7 +56,7 @@ namespace CompanionApplication
         // Changes device mode
         public void ModeSwitch(DeviceMode mode)
         {
-            remoteConnection.Send(new Command("MODESET", (int)mode));
+            remoteConnection.Send(new Command(TxCommand.ModeSet, (int)mode));
 
             deviceMode = mode;
             switch (mode)
@@ -80,7 +100,7 @@ namespace CompanionApplication
                             }
                             break;
                         case Interface.iTunes:
-                            applicationInterface = new ApplicationMedia.iTunes.Interface(ref remoteConnection, ref richPresence);
+                            applicationInterface = new ApplicationMedia.iTunes.Interface(ref remoteConnection, this, ref richPresence);
                             break;
                     }
                     break;

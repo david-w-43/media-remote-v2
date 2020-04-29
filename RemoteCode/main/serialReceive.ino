@@ -28,16 +28,16 @@ void serialEvent() {
       // Do stuff as usual
 
       // COMMANDS THAT APPLY TO ALL OR NONE OF THE MODES
-      if (identifier == "CONNECTIONREQUEST") {
+      if (identifier == "HAND") {
         // Handshakes with the PC
         Serial.println("REQUESTACCEPTED");
-      } else if (identifier == "MODEQUERY") {
+      } else if (identifier == "MDQU") {
         // Report the current device mode
         Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
-      } else if (identifier == "MODESET") {
+      } else if (identifier == "MDST") {
         // Switch to appropriate mode
         deviceMode = (DeviceMode)parameter.toInt();
-      } else if (identifier == "CONNECTED") {
+      } else if (identifier == "CONN") {
         if (parameter == "1"){
           companionConnected = true;
         } else {
@@ -45,36 +45,36 @@ void serialEvent() {
           // Clock mode on disconnect
           deviceMode = Clock;
         }
-      } else if (identifier == "PLAYING") {
+      } else if (identifier == "APPC") {
         if (parameter == "1" ) {applicationPlaying = true; }
         else { applicationPlaying = false; }
       }
 
       // Commands that update device settings
-      if (identifier.startsWith("UPD")) {
-        if (identifier == "UPDSCROLL") {
+      if (identifier.startsWith("UP")) {
+        if (identifier == "UPSCR") {
           // Scrolling of long strings
           if (parameter == "0") {
             deviceOptions.stringScroll = false;
           } else {
             deviceOptions.stringScroll = true;
           }
-        } else if (identifier == "UPDALBUM") {
-          // Display of album over artist
-          if (parameter == "0") {
-            deviceOptions.displayAlbum = false;
-          }
-          else
-          {
-            deviceOptions.displayAlbum = true;
-          }
+//        } else if (identifier == "UPDALBUM") {
+//          // Display of album over artist
+//          if (parameter == "0") {
+//            deviceOptions.displayAlbum = false;
+//          }
+//          else
+//          {
+//            deviceOptions.displayAlbum = true;
+//          }
         }
-        else if (identifier == "UPDBRIGHT") {
+        else if (identifier == "UPBCK") {
           int level = parameter.toInt();
           deviceOptions.brightness = level;
           SetBacklight(level);
         }
-        else if (identifier == "UPDTIME"){
+        else if (identifier == "UPTIM"){
           byte second = (byte)(getParameter(parameter, '|', 0).toInt());
           byte minute = (byte)(getParameter(parameter, '|', 1).toInt());
           byte hour = (byte)(getParameter(parameter, '|', 2).toInt());
@@ -122,30 +122,34 @@ void ApplicationControlCommands(String identifier, String parameter) {
   // Nothing yet
   if (identifier == "TIME") {
     currentValues.playbackPos = parameter.toInt();
-  } else if (identifier == "PLAYING") {
-    if (parameter == "1") {
-      applicationPlaying = true;
-    }
-    else {
-      applicationPlaying = false;
-    }
-  }
-  else if (identifier == "VOLUME") {
+  } 
+//  else if (identifier == "APPC") {
+//    if (parameter == "1") {
+//      applicationPlaying = true;
+//    }
+//    else {
+//      applicationPlaying = false;
+//    }
+//  }
+  else if (identifier == "VOL") {
     currentValues.volume = parameter.toInt();
   }
-  else if (identifier == "TITLE") {
+  else if (identifier == "TITL") {
     currentValues.title = parameter;
   }
-  else if (identifier == "ARTIST") {
-    currentValues.artist = parameter;
+//  else if (identifier == "ARTIST") {
+//    currentValues.artist = parameter;
+//  }
+//  else if (identifier == "ALBUM") {
+//    currentValues.album = parameter;
+//  }
+  else if (identifier == "SUBT") {
+    currentValues.subtitle = parameter;
   }
-  else if (identifier == "ALBUM") {
-    currentValues.album = parameter;
-  }
-  else if (identifier == "LENGTH") {
+  else if (identifier == "LEN") {
     currentValues.trackLength = parameter.toInt();
   }
-  else if (identifier == "SHUFFLE") {
+  else if (identifier == "SHUFF") {
     if (parameter == "1") {
       currentValues.shuffle = true;
     }
@@ -153,10 +157,10 @@ void ApplicationControlCommands(String identifier, String parameter) {
       currentValues.shuffle = false;
     }
   }
-  else if (identifier == "REPEATMODE") {
+  else if (identifier == "RPTM") {
     currentValues.repeatMode = (RepeatMode)(parameter.toInt());
   }
-  else if (identifier == "STATUS") {
+  else if (identifier == "STAT") {
     currentValues.playbackStatus = (PlaybackStatus)parameter.toInt();
   }
 }

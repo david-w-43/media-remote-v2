@@ -130,7 +130,7 @@ namespace CompanionApplication
     {
         // Constant declarations
         private const int baudRate = 19200; // Baud rate to use
-        private const string handshakeString = "CONNECTIONREQUEST"; // Initiates handshake
+        private string handshakeString = TxCommand.ConnectionRequest; // Initiates handshake
         private const string handshakeResponse = "REQUESTACCEPTED"; // The correct response to receive
 
         CommandCache sentCache = new CommandCache();
@@ -230,10 +230,10 @@ namespace CompanionApplication
                     settings.Save();
 
                     // Indicate that remote is connected
-                    Send(new Command("CONNECTED", true));
+                    Send(new Command(TxCommand.Connected, true));
 
                     // Request current device mode
-                    Send(new Command("MODEQUERY"));
+                    Send(new Command(TxCommand.ModeQuery));
                 }
             }
             if (!connected) { throw new System.IO.IOException("Iterated through all (" + systemPorts.Count + ") ports and remote was not found"); }
@@ -253,13 +253,12 @@ namespace CompanionApplication
                 sentCache.Add(command);
 
                 // Write to console with timestamp
-                Console.WriteLine(DateTime.Now.Second + "." + DateTime.Now.Millisecond + ": " + command.Format());
+                Console.WriteLine("S " + DateTime.Now.Second + "." + DateTime.Now.Millisecond + ": " + command.Format());
             }
             else
             {
                 Console.WriteLine("Serial port closed");
             }
-            
         }
 
         /// <summary>
@@ -299,7 +298,7 @@ namespace CompanionApplication
                 // Providing the line is not empty
                 if (line != null) {
                     // Write line to console with timestamp
-                    Console.WriteLine(DateTime.Now.Second + "." + DateTime.Now.Millisecond + ": " + line);
+                    Console.WriteLine("R " + DateTime.Now.Second + "." + DateTime.Now.Millisecond + ": " + line);
 
                     // Split line on space, first element should be command identifier
                     if (line.Contains("("))
@@ -334,17 +333,17 @@ namespace CompanionApplication
             int val;
             if (settings.ScrollLongText) { val = 1; } else { val = 0; }
             //Send("UPDSCROLL(" + val + ")");
-            Send(new Command("UPDSCROLL", val));
+            Send(new Command(TxCommand.UpdateScroll, val));
 
-            // Send display album bool
-            if (settings.DisplayAlbum) { val = 1; } else { val = 0; }
-            //Send("UPDALBUM(" + val + ")");
-            Send(new Command("UPDALBUM", val));
+            //// Send display album bool
+            //if (settings.DisplayAlbum) { val = 1; } else { val = 0; }
+            ////Send("UPDALBUM(" + val + ")");
+            //Send(new Command("UPDALBUM", val));
         }
 
         public void Disconnect()
         {
-            Send(new Command("CONNECTED", false));
+            Send(new Command(TxCommand.Connected, false));
 
             serialPort.Dispose();
         }

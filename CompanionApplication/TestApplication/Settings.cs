@@ -98,7 +98,7 @@ namespace CompanionApplication
                 '|' + ((int)t.DayOfWeek).ToString() + '|' + t.Day.ToString() + '|' + t.Month.ToString() +
                 '|' + year.ToString();
 
-            remoteConnection.Send(new Command("UPDTIME", timeString));
+            remoteConnection.Send(new Command(TxCommand.SetRTCTime, timeString));
         }
     }
 }

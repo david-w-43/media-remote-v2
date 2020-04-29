@@ -36,10 +36,11 @@ namespace CompanionApplication.ApplicationMedia
     /// </summary>
     class ApplicationInterface
     {
-        protected Values currentValues, prevValues;
+        protected Values currentValues, prevValues = new Values();
 
         protected RemoteConnection remoteConnection;
         protected Discord.DiscordRichPresence richPresence;
+        protected CommandHandler commandHandler;
 
         protected Timer updateTimer = new Timer {
             AutoReset = true,

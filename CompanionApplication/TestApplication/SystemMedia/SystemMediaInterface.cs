@@ -57,7 +57,7 @@ namespace CompanionApplication.SystemMedia
         /// <param name="change"></param>
         public void VolumeAdjust(int change)
         {
-            //remoteConnection.Send(new Command("VOLUME", (int)audioController.Adjust(change)));
+            //remoteConnection.Send(new Command(TxCommand.SetVolume, (int)audioController.Adjust(change)));
         }
     }
 }

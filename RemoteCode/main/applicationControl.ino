@@ -3,13 +3,17 @@
 #define TITLE_Y 14
 const uint8_t* TITLE_FONT = helv14R;
 
-#define ARTIST_X 0
-#define ARTIST_Y 31
-const uint8_t* ARTIST_FONT = helv12R;
+//#define ARTIST_X 0
+//#define ARTIST_Y 31
+//const uint8_t* ARTIST_FONT = helv12R;
+//
+//#define ALBUM_X 0
+//#define ALBUM_Y 31
+//const uint8_t* ALBUM_FONT = helv12R;
 
-#define ALBUM_X 0
-#define ALBUM_Y 31
-const uint8_t* ALBUM_FONT = helv12R;
+#define SUBTITLE_X 0
+#define SUBTITLE_Y 31
+const uint8_t* SUBTITLE_FONT = helv12R;
 
 #define VOLUME_X 0
 #define VOLUME_Y 45
@@ -32,8 +36,9 @@ enum PlaybackStatus { PLAYING, PAUSED, STOPPED };
 // Values structure
 struct Values {
   String title;
-  String artist;
-  String album;
+  //String artist;
+  //String album;
+  String subtitle;
   unsigned int trackLength;
   unsigned int playbackPos;
   unsigned int volume;
@@ -93,11 +98,12 @@ void DisplayApplicationControl() {
     // Print title
     PrintTitle();
     // Print either artist or album
-    if (!deviceOptions.displayAlbum) {
-      PrintArtist();
-    } else {
-      PrintAlbum();
-    }
+//    if (!deviceOptions.displayAlbum) {
+//      PrintArtist();
+//    } else {
+//      PrintAlbum();
+//    }
+    PrintSubtitle();
     // Print volume icon
     PrintVolume();
     // Print repeat icon
@@ -127,14 +133,19 @@ void PrintTitle() {
   ScrollText(currentValues.title, TITLE_Y);
 }
 
-void PrintArtist() {
-  lcd.setFont(ARTIST_FONT);
-  ScrollText(currentValues.artist, ARTIST_Y);
-}
+//void PrintArtist() {
+//  lcd.setFont(ARTIST_FONT);
+//  ScrollText(currentValues.artist, ARTIST_Y);
+//}
+//
+//void PrintAlbum() {
+//  lcd.setFont(ALBUM_FONT);
+//  ScrollText(currentValues.album, ALBUM_Y);
+//}
 
-void PrintAlbum() {
-  lcd.setFont(ALBUM_FONT);
-  ScrollText(currentValues.album, ALBUM_Y);
+void PrintSubtitle() {
+  lcd.setFont(SUBTITLE_FONT);
+  ScrollText(currentValues.subtitle, SUBTITLE_Y);
 }
 
 void ScrollText(String text, int yPos) {

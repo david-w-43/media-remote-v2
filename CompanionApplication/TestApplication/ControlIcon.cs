@@ -278,7 +278,7 @@ namespace CompanionApplication
             float value = int.Parse(((MenuItem)sender).Text.TrimEnd('%')) / 100f;
             int scaled = (int)Math.Round((Math.Pow(value, 2) * 255));
 
-            connection.Send(new Command("UPDBRIGHT", scaled));
+            connection.Send(new Command(TxCommand.SetBrightness, scaled));
         }
     }
 }

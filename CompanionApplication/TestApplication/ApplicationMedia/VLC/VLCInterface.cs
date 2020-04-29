@@ -37,7 +37,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
                 // Connect to socket
                 client.ConnectToServer(hostname, port);
 
-                remoteConnection.Send(new Command("PLAYING", true));
+                remoteConnection.Send(new Command(TxCommand.SetMediaAppConnected, true));
 
                 // Initialise values, these cannot be read from VLC console
                 Shuffle(false);
@@ -59,7 +59,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
         }
 
 
-        private bool filepathFound, titleFound, stateFound, artistFound, albumFound, volumeFound, lengthFound = false;
+        private bool filepathFound, titleFound, stateFound, artistFound, albumFound, volumeFound, lengthFound, typeFound = false;
         /// <summary>
         /// Updates information about current track and playback
         /// </summary>
@@ -144,8 +144,8 @@ namespace CompanionApplication.ApplicationMedia.VLC
             // Checks if the track is new
             if ((!Equals(currentValues.filepath, prevValues.filepath) || !lengthFound) && filepathFound)
             {
-                artistFound = albumFound = titleFound = lengthFound = false;
-                currentValues.mediaType = MediaType.audio;
+                artistFound = albumFound = titleFound = lengthFound = typeFound = false;
+                //currentValues.mediaType = MediaType.audio;
 
                 // Request track metadata
                 client.SendLine("info");
@@ -174,9 +174,18 @@ namespace CompanionApplication.ApplicationMedia.VLC
                         currentValues.title = line.Substring(start);
                         titleFound = true;
                     }
-                    else if (line.Contains("| Type: Video"))
+                    else if (line.Contains("| Type:") && !typeFound)
                     {
-                        currentValues.mediaType = MediaType.video;
+                        typeFound = true;
+
+                        if (line.Contains("Video"))
+                        {
+                            currentValues.mediaType = MediaType.video;
+                        }
+                        else
+                        {
+                            currentValues.mediaType = MediaType.audio;
+                        }
                     }
                 } 
 
@@ -200,16 +209,42 @@ namespace CompanionApplication.ApplicationMedia.VLC
                 var settings = Properties.Settings.Default;
 
                 // If changed, add to list of commands to send
-                if ((currentValues.title != prevValues.title) || !titleFound) { toSend.Add(new Command("TITLE", currentValues.title)); }
-                if (((currentValues.artist != prevValues.artist) || !artistFound) &&  !settings.DisplayAlbum) { toSend.Add(new Command("ARTIST", currentValues.artist)); }
-                if ((currentValues.trackLength != prevValues.trackLength) || !lengthFound ) { toSend.Add(new Command("LENGTH", currentValues.trackLength)); }
-                if (((currentValues.album != prevValues.album) || !albumFound) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
+                if ((currentValues.title != prevValues.title) || !titleFound) { toSend.Add(new Command(TxCommand.SetTitle, currentValues.title)); }
+
+                //if (((currentValues.artist != prevValues.artist) || !artistFound) &&  !settings.DisplayAlbum) { toSend.Add(new Command("ARTIST", currentValues.artist)); }
+                //if (((currentValues.album != prevValues.album) || !albumFound) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
+
+                //if ((currentValues.artist != prevValues.artist) || (currentValues.album != prevValues.album))
+                //{
+                //    toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.GetSubtitle()));
+                //}
+
+                switch (currentValues.mediaType)
+                {
+                    case MediaType.audio:
+                        if (Properties.Settings.Default.DisplayAlbum)
+                        {
+                            toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.album));
+                        }
+                        else
+                        {
+                            toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.artist));
+                        }
+                        break;
+                    case MediaType.video:
+                        string[] elements = currentValues.filepath.Split('/');
+                        toSend.Add(new Command(TxCommand.SetSubtitle, elements[elements.Length - 2]));
+                        break;
+                }
+                
+
+                if ((currentValues.trackLength != prevValues.trackLength) || !lengthFound ) { toSend.Add(new Command(TxCommand.SetLength, currentValues.trackLength)); }
             }
 
             // Send updated data to remote
-            if ((currentValues.volume != prevValues.volume) || !volumeFound) { toSend.Add(new Command("VOLUME", (int)currentValues.volume)); }
-            if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command("STATUS", (int)currentValues.playStatus)); }
-            if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command("TIME", currentValues.playbackPos)); }
+            if ((currentValues.volume != prevValues.volume) || !volumeFound) { toSend.Add(new Command(TxCommand.SetVolume, (int)currentValues.volume)); }
+            if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command(TxCommand.SetStatus, (int)currentValues.playStatus)); }
+            if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command(TxCommand.SetTime, currentValues.playbackPos)); }
 
             PushUpdate(toSend);
         }
@@ -285,7 +320,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
             client.SendLine("random " + onOff);
 
             //remoteConnection.Send("SHUFFLE(" + onOff));
-            remoteConnection.Send(new Command("SHUFFLE", enabled));
+            remoteConnection.Send(new Command(TxCommand.SetShuffle, enabled));
         }
 
         /// <summary>
@@ -334,18 +369,20 @@ namespace CompanionApplication.ApplicationMedia.VLC
 
             // Update display
             //remoteConnection.Send("REPEATMODE(" + (int)currentValues.repeatMode));
-            remoteConnection.Send(new Command("REPEATMODE", (int)currentValues.repeatMode));
+            remoteConnection.Send(new Command(TxCommand.SetRepeatMode, (int)currentValues.repeatMode));
         }
 
         public override void Disconnect()
         {
-            remoteConnection.Send(new Command("PLAYING", false));
+            remoteConnection.Send(new Command(TxCommand.SetMediaAppConnected, false));
 
+            // Unsubscribe from event and stop timer
+            updateTimer.Elapsed -= UpdateInformation;
             updateTimer.Stop();
+
             // Stop playback
             client.SendLine("stop");
             richPresence.Dispose();
-
         }
     }
 }
