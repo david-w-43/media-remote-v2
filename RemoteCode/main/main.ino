@@ -81,8 +81,9 @@ Encoder enc(ENC1, ENC2);
 #define ENABLE_SERIAL_FRAME_DEBUG false
 #define ENABLE_DISPLAY_FRAME_DEBUG false
 
-// Serial baud rate
+// Serial constants
 #define BAUD_RATE 19200
+#define SERIAL_TIMEOUT 200
 
 // Display dimensions
 #define HEIGHT 64
@@ -103,7 +104,6 @@ enum DeviceMode { Clock, ApplicationControl, SystemMedia, Menu };
 // Options
 struct DeviceOptions {
   bool stringScroll;
-  //bool displayAlbum;
   int brightness;
 };
 
@@ -183,6 +183,7 @@ void setup() {
 
   // Connects to serial
   Serial.begin(BAUD_RATE);
+  Serial.setTimeout(SERIAL_TIMEOUT);
   Serial.println("REQUESTACCEPTED");
 
   temperatureStr = GetTemperatureStr();
@@ -239,44 +240,6 @@ void loop() {
   bool D = btnD.read();
   bool E = btnENC.read();
 
-  //if (deviceMode )
-
-  //  // Gets whether or not A or D is newly long pressed
-  //  if (btnA.pressedFor(LONG_PRESS) && !prevlongA ) {
-  //    longA = true;
-  //    prevlongA = true;
-  //  }
-  //  if (btnD.pressedFor(LONG_PRESS) && !prevlongD ) {
-  //    longD = true;
-  //    prevlongD = true;
-  //  }
-  //  if ( btnA.wasReleased() ) {
-  //    prevlongA = false;
-  //  }
-  //  if ( btnD.wasReleased() ) {
-  //    prevlongD = false;
-  //  }
-  //
-  //  // If A or D was long pressed, go to next/prev mode
-  //  if ( longA ) {
-  //    longA = false;
-  //    if (deviceMode != 0) { // Decrement device mode
-  //      deviceMode = (DeviceMode)((int)deviceMode - 1);
-  //    } else {
-  //      deviceMode = (DeviceMode)3; // Wrap around
-  //    }
-  //    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
-  //  }
-  //  else if ( longD ) {
-  //    longD = false;
-  //    if (deviceMode != 3) { // Increment device mode
-  //      deviceMode = (DeviceMode)((int)deviceMode + 1);
-  //    } else {
-  //      deviceMode = (DeviceMode)0; // Wrap around
-  //    }
-  //    Serial.println("MODESWITCH(" + (String)(int)deviceMode + ")");
-  //  }
-
   // Behaviour depends on the current mode
   switch (deviceMode) {
     case Clock:
@@ -292,63 +255,6 @@ void loop() {
       DisplayMenu();
       break;
   }
-  //}
-
-  //  int encoderValue = GetEncoderValue();
-  //  //Serial.println(encoderValue);
-  ////  int frameInterval = GetFrameInterval();
-  //
-  //  // Buttons are pulled up, so usually high
-  //  if (!digitalRead(BTN_A)) { A = true;} else { A = false; }
-  //  if (!digitalRead(BTN_B)) { B = true;} else { B = false; }
-  //  if (!digitalRead(BTN_C)) { C = true;} else { C = false; }
-  //  if (!digitalRead(BTN_D)) { D = true;} else { D = false; }
-  //
-  //  // If interval has passed, record temperature again
-  //  if (millis() > prevTempMillis + TEMPERATURE_INTERVAL) {
-  //    temperatureStr = GetTemperatureStr();
-  //  }
-  //
-  //  String showPressed = "";
-  //  if (A) {showPressed += "A";} else {showPressed += " ";}
-  //  if (B) {showPressed += "B";} else {showPressed += " ";}
-  //  if (C) {showPressed += "C";} else {showPressed += " ";}
-  //  if (D) {showPressed += "D";} else {showPressed += " ";}
-  //
-  //  // Debug
-  //  Serial.println(showPressed);
-  //
-  //  // https://github.com/olikraus/u8glib/wiki/tpictureloop
-  //  lcd.firstPage();
-  //  do {
-  //    lcd.setFont(logisoso16);
-  //    lcd.setCursor(0, 20);
-  //    lcd.print(temperatureStr);
-  //
-  //    lcd.setCursor(0, 40);
-  //    lcd.print(showPressed);
-  //
-  //    // If frame debug enabled, show frame timing data on display
-  //    if (ENABLE_DISPLAY_FRAME_DEBUG) {
-  //      lcd.setFont(smallFont);
-  //      lcd.setCursor(0, 40);
-  //      lcd.print(String(frameInterval) + " ms");
-  //      if (frameSwitch){lcd.drawBox(85, 32, 8, 8);}
-  //    }
-  //
-  //    lcd.setCursor(0, 63);
-  //    lcd.print(encoderValue);
-  //  } while (lcd.nextPage());
-  //
-  //  if (!digitalRead(ENC_SW)) {
-  //    Serial.println("Clearing");
-  //    enc.write(0);
-  //  }
-  //
-  //  // Print frame intervals to serial monitor
-  //  if (ENABLE_SERIAL_FRAME_DEBUG) {
-  //    Serial.println(frameInterval);
-  //  }
 }
 
 
@@ -395,10 +301,4 @@ int GetFrameInterval() {
 void SetBacklight(int level) {
   analogWrite(LCD_BACKLIGHT, level);
   //digitalWrite(LCD_BACKLIGHT, HIGH);
-}
-
-// SetContrast -------------------------------------------------------------------------
-// Sets contrast level
-void SetContrast(int level) {
-
 }
