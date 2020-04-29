@@ -3,14 +3,6 @@
 #define TITLE_Y 14
 const uint8_t* TITLE_FONT = helv14R;
 
-//#define ARTIST_X 0
-//#define ARTIST_Y 31
-//const uint8_t* ARTIST_FONT = helv12R;
-//
-//#define ALBUM_X 0
-//#define ALBUM_Y 31
-//const uint8_t* ALBUM_FONT = helv12R;
-
 #define SUBTITLE_X 0
 #define SUBTITLE_Y 31
 const uint8_t* SUBTITLE_FONT = helv12R;
@@ -97,12 +89,7 @@ void DisplayApplicationControl() {
 
     // Print title
     PrintTitle();
-    // Print either artist or album
-//    if (!deviceOptions.displayAlbum) {
-//      PrintArtist();
-//    } else {
-//      PrintAlbum();
-//    }
+    // Print subtitle
     PrintSubtitle();
     // Print volume icon
     PrintVolume();
@@ -115,7 +102,6 @@ void DisplayApplicationControl() {
 
     // Update LCD
     lcd.sendBuffer();
-    //Serial.println("update" + (millis() - receivedMillis));
   } else {
     // If not connected to the application
     lcd.clearBuffer();
@@ -132,16 +118,6 @@ void PrintTitle() {
   lcd.setFont(TITLE_FONT);
   ScrollText(currentValues.title, TITLE_Y);
 }
-
-//void PrintArtist() {
-//  lcd.setFont(ARTIST_FONT);
-//  ScrollText(currentValues.artist, ARTIST_Y);
-//}
-//
-//void PrintAlbum() {
-//  lcd.setFont(ALBUM_FONT);
-//  ScrollText(currentValues.album, ALBUM_Y);
-//}
 
 void PrintSubtitle() {
   lcd.setFont(SUBTITLE_FONT);
