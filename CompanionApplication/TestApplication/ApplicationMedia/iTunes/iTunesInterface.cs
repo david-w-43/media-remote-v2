@@ -17,6 +17,9 @@ namespace CompanionApplication.ApplicationMedia.iTunes
         {
             currentValues.player = ApplicationMedia.Interface.iTunes;
 
+            // Stopped by default
+            currentValues.playStatus = PlayStatus.stopped;
+
             this.remoteConnection = remoteConnection;
             this.richPresence = richPresence;
             this.commandHandler = commandHandler;
@@ -45,7 +48,7 @@ namespace CompanionApplication.ApplicationMedia.iTunes
         {
             //Console.WriteLine("Volume: " + newVolume);
             currentValues.volume = newVolume;
-            UpdateRemote();
+            //UpdateRemote();
         }
 
         private void Application_OnAboutToPromptUserToQuitEvent()
@@ -74,7 +77,7 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
             currentValues.playStatus = PlayStatus.playing;
 
-            UpdateRemote();
+            //UpdateRemote();
         }
 
         private void NewUpdateInformation(object sender, ElapsedEventArgs e)

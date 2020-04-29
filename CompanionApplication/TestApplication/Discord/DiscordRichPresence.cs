@@ -35,7 +35,7 @@ namespace CompanionApplication.Discord
 
                 if (!client.IsDisposed && client.IsInitialized)
                 {
-                    if (values.playStatus == ApplicationMedia.PlayStatus.playing || values.playStatus == ApplicationMedia.PlayStatus.paused)
+                    if (values.playStatus != ApplicationMedia.PlayStatus.stopped)
                     {
                         // Get large image
                         Assets images = new Assets();
