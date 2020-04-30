@@ -121,6 +121,15 @@ namespace CompanionApplication
             //return null;
             return cache.FindLast(x => x.identifier == identifier);
         }
+
+        /// <summary>
+        /// Returns the cache as a list
+        /// </summary>
+        /// <returns></returns>
+        public List<Command> ListCommands()
+        {
+            return cache;
+        }
     }
 
     /// <summary>
@@ -269,7 +278,7 @@ namespace CompanionApplication
         {
             foreach (Command command in commands)
             {
-                Send(command);
+                 Send(command);
             }
         }
 

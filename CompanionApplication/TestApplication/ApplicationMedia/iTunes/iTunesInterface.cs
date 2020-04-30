@@ -32,7 +32,7 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             //application.OnSoundVolumeChangedEvent += VolumeChangedHandler;
             //application.OnAboutToPromptUserToQuitEvent += Disconnect;
 
-            updateTimer.Elapsed += NewUpdateInformation;
+            updateTimer.Elapsed += UpdateInformation;
             updateTimer.Start();
 
             // Experimental event listeners
@@ -48,6 +48,11 @@ namespace CompanionApplication.ApplicationMedia.iTunes
         {
             //Console.WriteLine("Volume: " + newVolume);
             currentValues.volume = newVolume;
+            if (currentValues.volume != prevValues.volume)
+            {
+                PushUpdate(new List<Command>() { new Command(TxCommand.SetVolume, currentValues.volume) });
+            }
+            
             //UpdateRemote();
         }
 
@@ -61,14 +66,13 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
         private void Application_OnPlayerStopEvent(object iTrack)
         {
-            Console.WriteLine("Stopped playing");
+            //Console.WriteLine("Stopped playing");
             currentValues.playStatus = PlayStatus.stopped;
         }
 
         private void Application_OnPlayerPlayEvent(object iTrack)
         {
             IITTrack currentTrack = (IITTrack)iTrack;
-
             // Grab values
             currentValues.title = currentTrack.Name;
             currentValues.artist = currentTrack.Artist;
@@ -77,113 +81,14 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
             currentValues.playStatus = PlayStatus.playing;
 
-            //UpdateRemote();
-        }
-
-        private void NewUpdateInformation(object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                currentValues.playbackPos = application.PlayerPosition;
-                currentValues.volume = application.SoundVolume;
-                currentValues.shuffle = application.CurrentPlaylist.Shuffle;
-
-                // Convert iTunes repeat mode enum
-                switch (application.CurrentPlaylist.SongRepeat)
-                {
-                    case ITPlaylistRepeatMode.ITPlaylistRepeatModeOff:
-                        currentValues.repeatMode = RepeatMode.off;
-                        break;
-                    case ITPlaylistRepeatMode.ITPlaylistRepeatModeOne:
-                        currentValues.repeatMode = RepeatMode.one;
-                        break;
-                    case ITPlaylistRepeatMode.ITPlaylistRepeatModeAll:
-                        currentValues.repeatMode = RepeatMode.all;
-                        break;
-                }
-
-                // If values have changed, update remote display
-                if (!Equals(currentValues, prevValues)) { UpdateRemote(); }
-            }
-            catch (Exception)
-            {
-            }
-            
-        }
-
-        protected override void UpdateInformation(object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                // Get current track
-                IITTrack currentTrack = application.CurrentTrack;
-
-                // Convert iTunes play status
-                ITPlayerState state = application.PlayerState;
-                switch (state)
-                {
-                    case ITPlayerState.ITPlayerStateStopped:
-                        currentValues.playStatus = PlayStatus.stopped;
-                        break;
-                    case ITPlayerState.ITPlayerStatePlaying:
-                        currentValues.playStatus = PlayStatus.playing;
-                        break;
-                    case ITPlayerState.ITPlayerStateFastForward:
-                        currentValues.playStatus = PlayStatus.fastforward;
-                        break;
-                    case ITPlayerState.ITPlayerStateRewind:
-                        currentValues.playStatus = PlayStatus.rewind;
-                        break;
-                }
-
-                // Grab values
-                currentValues.title = currentTrack.Name;
-                currentValues.artist = currentTrack.Artist;
-                currentValues.album = currentTrack.Album;
-                currentValues.trackLength = currentTrack.Duration;
-
-                currentValues.playbackPos = application.PlayerPosition;
-                currentValues.volume = application.SoundVolume;
-                currentValues.shuffle = application.CurrentPlaylist.Shuffle;
-
-                // Convert iTunes repeat mode enum
-                switch (application.CurrentPlaylist.SongRepeat)
-                {
-                    case ITPlaylistRepeatMode.ITPlaylistRepeatModeOff:
-                        currentValues.repeatMode = RepeatMode.off;
-                        break;
-                    case ITPlaylistRepeatMode.ITPlaylistRepeatModeOne:
-                        currentValues.repeatMode = RepeatMode.one;
-                        break;
-                    case ITPlaylistRepeatMode.ITPlaylistRepeatModeAll:
-                        currentValues.repeatMode = RepeatMode.all;
-                        break;
-                }
-
-                // If values have changed, update remote display
-                if (!Equals(currentValues, prevValues)) { UpdateRemote(); }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        private void UpdateRemote()
-        {
             // List of commands to send
             List<Command> toSend = new List<Command>();
 
-            // Shorthand for settings
-            var settings = Properties.Settings.Default;
+            // Send title
+            if (currentValues.title != prevValues.title) { toSend.Add(new Command(TxCommand.SetTitle, currentValues.title)); }
 
-            // If changed, add to list of commands to send
-            if ((currentValues.title != prevValues.title)) { toSend.Add(new Command(TxCommand.SetTitle, currentValues.title)); }
-            //if (((currentValues.artist != prevValues.artist)) && !settings.DisplayAlbum) { toSend.Add(new Command("ARTIST", currentValues.artist)); }
-            if ((currentValues.trackLength != prevValues.trackLength)) { toSend.Add(new Command(TxCommand.SetLength, currentValues.trackLength)); }
-            //if (((currentValues.album != prevValues.album)) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
-
-            if (settings.DisplayAlbum)
+            // Send subtitle
+            if (Properties.Settings.Default.DisplayAlbum)
             {
                 if (currentValues.album != prevValues.album)
                 {
@@ -198,26 +103,119 @@ namespace CompanionApplication.ApplicationMedia.iTunes
                 }
             }
 
-            // Send updated data to remote
-            if ((currentValues.volume != prevValues.volume)) { toSend.Add(new Command(TxCommand.SetVolume, (int)currentValues.volume)); }
-            if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command(TxCommand.SetStatus, (int)currentValues.playStatus)); }
-            if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command(TxCommand.SetTime, currentValues.playbackPos)); }
+            // Send track length
+            if (currentValues.trackLength != prevValues.trackLength) { toSend.Add(new Command(TxCommand.SetLength, currentValues.trackLength)); }
 
-            // Shuffle
-            if (currentValues.shuffle != prevValues.shuffle)
-            {
-                toSend.Add(new Command(TxCommand.SetShuffle, currentValues.shuffle));
-            }
+            // Send time
+            toSend.Add(new Command(TxCommand.SetTime, application.PlayerPosition));
 
-            // Repeat mode
-            if (currentValues.repeatMode != prevValues.repeatMode)
-            {
-                toSend.Add(new Command(TxCommand.SetRepeatMode, (int)currentValues.repeatMode));
-            }
-
-            // Send data to remote
             PushUpdate(toSend);
         }
+
+        private void UpdateInformation(object sender, ElapsedEventArgs e)
+        {
+            // Get playback position, shuffle and repeat modes
+            try
+            {
+                currentValues.playbackPos = application.PlayerPosition;
+                currentValues.shuffle = application.CurrentPlaylist.Shuffle/* && application.CanSetShuffle[application.CurrentPlaylist]*/;
+
+                //if (application.CanSetSongRepeat[application.CurrentPlaylist])
+                //{
+                    // Convert iTunes repeat mode enum
+                    switch (application.CurrentPlaylist.SongRepeat)
+                    {
+                        case ITPlaylistRepeatMode.ITPlaylistRepeatModeOff:
+                            currentValues.repeatMode = RepeatMode.off;
+                            break;
+                        case ITPlaylistRepeatMode.ITPlaylistRepeatModeOne:
+                            currentValues.repeatMode = RepeatMode.one;
+                            break;
+                        case ITPlaylistRepeatMode.ITPlaylistRepeatModeAll:
+                            currentValues.repeatMode = RepeatMode.all;
+                            break;
+                    }
+                //}
+                //else
+                //{
+                //    currentValues.repeatMode = RepeatMode.off;
+                //}
+
+                //// If values have changed, update remote display
+                //if (!Equals(currentValues, prevValues)) { UpdateRemote(); }
+
+                List<Command> toSend = new List<Command>();
+                if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command(TxCommand.SetTime, currentValues.playbackPos)); }
+                
+                //Shuffle
+                if (currentValues.shuffle != prevValues.shuffle)
+                {
+                    toSend.Add(new Command(TxCommand.SetShuffle, currentValues.shuffle));
+                }
+
+                // Repeat mode
+                if (currentValues.repeatMode != prevValues.repeatMode)
+                {
+                    toSend.Add(new Command(TxCommand.SetRepeatMode, (int)currentValues.repeatMode));
+                }
+                PushUpdate(toSend);
+
+            }
+            catch (Exception)
+            {
+            }
+            
+        }
+
+        //private void UpdateRemote()
+        //{
+        //    // List of commands to send
+        //    List<Command> toSend = new List<Command>();
+
+        //    // Shorthand for settings
+        //    var settings = Properties.Settings.Default;
+
+        //    // If changed, add to list of commands to send
+        //    if ((currentValues.title != prevValues.title)) { toSend.Add(new Command(TxCommand.SetTitle, currentValues.title)); }
+        //    //if (((currentValues.artist != prevValues.artist)) && !settings.DisplayAlbum) { toSend.Add(new Command("ARTIST", currentValues.artist)); }
+        //    if ((currentValues.trackLength != prevValues.trackLength)) { toSend.Add(new Command(TxCommand.SetLength, currentValues.trackLength)); }
+        //    //if (((currentValues.album != prevValues.album)) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
+
+        //    if (settings.DisplayAlbum)
+        //    {
+        //        if (currentValues.album != prevValues.album)
+        //        {
+        //            toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.album));
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (currentValues.artist != prevValues.artist)
+        //        {
+        //            toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.artist));
+        //        }
+        //    }
+
+        //    // Send updated data to remote
+        //    if ((currentValues.volume != prevValues.volume)) { toSend.Add(new Command(TxCommand.SetVolume, (int)currentValues.volume)); }
+        //    if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command(TxCommand.SetStatus, (int)currentValues.playStatus)); }
+        //    if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command(TxCommand.SetTime, currentValues.playbackPos)); }
+
+        //    // Shuffle
+        //    if (currentValues.shuffle != prevValues.shuffle)
+        //    {
+        //        toSend.Add(new Command(TxCommand.SetShuffle, currentValues.shuffle));
+        //    }
+
+        //    // Repeat mode
+        //    if (currentValues.repeatMode != prevValues.repeatMode)
+        //    {
+        //        toSend.Add(new Command(TxCommand.SetRepeatMode, (int)currentValues.repeatMode));
+        //    }
+
+        //    // Send data to remote
+        //    PushUpdate(toSend);
+        //}
 
         public override void Next() { application.NextTrack(); }
 

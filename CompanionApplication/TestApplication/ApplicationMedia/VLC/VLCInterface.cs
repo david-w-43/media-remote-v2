@@ -65,7 +65,7 @@ namespace CompanionApplication.ApplicationMedia.VLC
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected override void UpdateInformation(object sender, System.Timers.ElapsedEventArgs e)
+        protected void UpdateInformation(object sender, System.Timers.ElapsedEventArgs e)
         {
             // List of commands to send to remote
             List<Command> toSend = new List<Command>();

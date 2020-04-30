@@ -17,18 +17,18 @@ namespace CompanionApplication.ApplicationMedia
     /// </summary>
     public struct Values
     {
-        public Interface player;
-        public string title;
-        public string artist;
-        public string album;
-        public int trackLength;
-        public int playbackPos;
-        public float volume; // 0 - 100
-        public RepeatMode repeatMode;
-        public bool shuffle;
-        public string filepath;
-        public PlayStatus playStatus;
-        public MediaType mediaType;
+        public volatile Interface player;
+        public volatile string title;
+        public volatile string artist;
+        public volatile string album;
+        public volatile int trackLength;
+        public volatile int playbackPos;
+        public volatile int volume; // 0 - 100
+        public volatile RepeatMode repeatMode;
+        public volatile bool shuffle;
+        public volatile string filepath;
+        public volatile PlayStatus playStatus;
+        public volatile MediaType mediaType;
     }
 
     /// <summary>
@@ -108,13 +108,6 @@ namespace CompanionApplication.ApplicationMedia
         /// </summary>
         /// <param name="change"></param>
         public virtual void VolumeAdjust(int change) { }
-
-        /// <summary>
-        /// Used to update playback information, called by timer
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected virtual void UpdateInformation(object sender, ElapsedEventArgs e) { }
 
         /// <summary>
         /// Disconnects from interface
