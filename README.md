@@ -4,9 +4,15 @@
 
 ## Current Features:
 - Clock mode
+
+    <img src="./docs/images/clockmode.jpg" width="420"> 
+
     - Ambient temperature display
     - Real-time clock displaying time and date
 - Media Application Control mode
+
+    <img src="./docs/images/mediaapplicationmode.jpg" width="420"> 
+
     - Control over VLC and iTunes:
         - Next / previous track
         - Play / pause
@@ -20,8 +26,14 @@
         - Playback position with progress bar
         - Shuffle and repeat modes
     - Discord Rich Presence integration
+    
+        <img src="./docs/images/discordRP.jpg"> 
+
         - Adjustable privacy
 - Configurable backlight brightness
+
+    <img src="./docs/images/backlightselect.jpg"> 
+
 - Long text scrolls across display
 
 ### Planned features:
@@ -31,6 +43,9 @@
     - Simulate multimedia keys for basic control over many applications
 
 ## Hardware
+
+<img src="./docs/images/pcbtop.png"> 
+
 ### Microcontroller
 The device uses a custom PCB, on which is an **ATmega1284P** microcontroller (clocked at 16 MHz) that is used for all of the remote-side processing.
 
