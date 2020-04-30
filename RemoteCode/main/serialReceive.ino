@@ -5,7 +5,7 @@ void serialEvent() {
   Serial.flush(); // Wait for outgoing data to transmit
 
   //Serial.println("Data received");
-  
+
   String lines[LINECOUNT];
   int lineCounter = 0;
 
@@ -20,15 +20,18 @@ void serialEvent() {
     if (millis() > startMillis + SERIAL_TIMEOUT)
     {
       // If timeout detected, clear buffer
-      while (Serial.available() > 0) { Serial.read(); }
-    } 
-    else 
+      while (Serial.available() > 0) {
+        Serial.read();
+      }
+      Serial.println("TIMEOUT");
+    }
+    else
     {
       // If no timeout,
       // Trim whitespace and write to array
       line.trim();
       lines[lineCounter] = line;
-  
+
       // Increment line counter
       lineCounter ++;
     }

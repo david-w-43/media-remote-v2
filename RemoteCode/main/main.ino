@@ -21,8 +21,6 @@
 #define ENCODER_OPTIMIZE_INTERRUPTS
 #include <Encoder.h>
 
-#define SERIAL_RX_BUFFER_SIZE=256
-
 // Pin definitions ------------------------------------------------------------------------
 
 // Encoder
@@ -83,7 +81,7 @@ Encoder enc(ENC1, ENC2);
 
 // Serial constants
 #define BAUD_RATE 19200
-#define SERIAL_TIMEOUT 200
+#define SERIAL_TIMEOUT 500
 
 // Display dimensions
 #define HEIGHT 64
