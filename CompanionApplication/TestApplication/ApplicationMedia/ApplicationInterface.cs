@@ -141,5 +141,17 @@ namespace CompanionApplication.ApplicationMedia
             // Update previous values
             prevValues = currentValues;
         }
+
+        /// <summary>
+        /// Called when application quits
+        /// </summary>
+        protected void OnQuitEvent()
+        {
+            // Disconnect interface
+            Disconnect();
+
+            // Return to clock mode
+            commandHandler.ModeSwitch(DeviceMode.Clock);
+        }
     }
 }

@@ -13,59 +13,13 @@ namespace CompanionApplication.SystemMedia
     /// </summary>
     class SystemAudioController
     {
-        // Creates enumerator for all playback devices
-        private List<CoreAudioDevice> devices = new CoreAudioController().GetPlaybackDevices().ToList();
-
         CoreAudioDevice defaultDevice;
+        CoreAudioController controller;
 
         public SystemAudioController()
         {
-            Update();
-            GetDefault();
-        }
-
-        /// <summary>
-        /// Shorthand function to get the default multimedia playback device, very slow
-        /// </summary>
-        /// <returns>Default multimedia playback device</returns>
-        public CoreAudioDevice GetDefault()
-        {
-            CoreAudioDevice toReturn = null;
-            foreach (CoreAudioDevice device in devices)
-            {
-                if (device.IsDefaultDevice) { toReturn = device; }
-            }
-            defaultDevice = toReturn;
-            return toReturn;
-        }
-
-        /// <summary>
-        /// Updates the list of connected devices
-        /// </summary>
-        /// <returns>True if changed</returns>
-        public bool Update()
-        {
-            List<CoreAudioDevice> oldList = new List<CoreAudioDevice>(devices);
-            this.devices = new CoreAudioController().GetPlaybackDevices().ToList();
-            if (Object.Equals(devices, oldList))
-            {
-                return false;
-            }
-            else { return true; }
-        }
-
-        /// <summary>
-        /// Returns list of playback device names
-        /// </summary>
-        /// <returns>List of names</returns>
-        public List<string> GetDeviceNames()
-        {
-            List<string> toReturn = new List<string>();
-            foreach (CoreAudioDevice device in devices)
-            {
-                toReturn.Add(device.Name);
-            }
-            return toReturn;
+            controller = new CoreAudioController();
+            defaultDevice = controller.DefaultPlaybackDevice;
         }
 
         /// <summary>
@@ -73,15 +27,29 @@ namespace CompanionApplication.SystemMedia
         /// </summary>
         /// <param name="change">Signed integer change in volume</param>
         /// <returns>New volume</returns>
-        public double Adjust(int change = 1)
+        public int Adjust(int change = 1)
         {
-            if ((defaultDevice != null) && (defaultDevice.State == DeviceState.Active))
-            {
-                defaultDevice.Volume += change;
-                return defaultDevice.Volume;
-            } else { return -1; }
-            
+            defaultDevice.Volume += change;
+            return (int)defaultDevice.Volume;
         }
+
+        //private class DefaultDeviceObserver : IObserver<DefaultDeviceChangedArgs>
+        //{
+        //    public void OnCompleted()
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    public void OnError(Exception error)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    public void OnNext(DefaultDeviceChangedArgs deviceChangedArgs)
+        //    {
+        //        // Do something with device
+        //    }
+        //}
 
         //private class VolumeObserver : IObserver<AudioSwitcher.AudioApi.DeviceVolumeChangedArgs>
         //{
@@ -98,6 +66,7 @@ namespace CompanionApplication.SystemMedia
         //    public void OnNext(DeviceVolumeChangedArgs value)
         //    {
         //        // Do something with value.Volume
+        //        Console.WriteLine("Changed to " + value.Volume);
         //    }
         //}
     }

@@ -97,12 +97,13 @@ Encoder enc(ENC1, ENC2);
 #define EEPROM_OPTIONS 0
 
 // Enumerators
-enum DeviceMode { Clock, ApplicationControl, SystemMedia, Menu };
+enum DeviceMode { Clock, ApplicationControl, SystemMedia};
 
 // Options
 struct DeviceOptions {
   bool stringScroll;
   int brightness;
+  int recipSensitivity;
 };
 
 // Shorthand font definitions -------------------------------------------------------------
@@ -143,6 +144,7 @@ const uint8_t* iconic_arrow8 = u8g2_font_open_iconic_arrow_1x_t;
 
 // Device mode, Clock by default
 DeviceMode deviceMode = Clock;
+bool inMenu = false;
 
 // Stores temperature in celsius, 1 decimal place with unit, as string
 String temperatureStr;
@@ -160,6 +162,8 @@ int prevEncoderVal;
 
 // True if companion application connected
 bool companionConnected;
+
+bool menuInputEnabled = false;
 
 // Setup ----------------------------------------------------------------------------------
 void setup() {
@@ -216,9 +220,7 @@ void setup() {
 
 // Toggles each loop / new frame
 bool frameSwitch = false;
-
-bool longA, longD = false;
-bool prevlongA, prevlongD = false;
+int prevSensitivity = deviceOptions.recipSensitivity;
 
 void loop() {
   // Toggles each frame
@@ -238,23 +240,36 @@ void loop() {
   bool D = btnD.read();
   bool E = btnENC.read();
 
-  // Behaviour depends on the current mode
-  switch (deviceMode) {
-    case Clock:
-      DisplayClock();
-      break;
-    case ApplicationControl:
-      DisplayApplicationControl();
-      break;
-    case SystemMedia:
-      DisplaySystemMedia();
-      break;
-    case Menu:
-      DisplayMenu();
-      break;
+  // Detects encoder long press
+  if (btnENC.pressedFor(LONG_PRESS)) {
+    menuInputEnabled = false;
+    inMenu = true;
+    prevSensitivity = deviceOptions.recipSensitivity;
+
+    SetSensitivity(4);
+  }
+
+  // If in menu
+  if (inMenu) {
+    if (btnENC.releasedFor(200) && btnENC.isReleased()) {
+      menuInputEnabled = true;
+    }
+    DisplayMenu();
+  } else {
+    // Behaviour depends on the current mode
+    switch (deviceMode) {
+      case Clock:
+        DisplayClock();
+        break;
+      case ApplicationControl:
+        DisplayApplicationControl();
+        break;
+      case SystemMedia:
+        DisplaySystemMedia();
+        break;
+    }
   }
 }
-
 
 // GetTemperatureStr -----------------------------------------------------------------
 // Returns temperature with units ----------------------------------------------------
@@ -278,7 +293,7 @@ String GetTemperatureStr() {
 // GetEncoderValue --------------------------------------------------------------------
 // Gets the value stored in the encoder -----------------------------------------------
 int GetEncoderValue() {
-  return enc.read();
+  return (enc.read() / deviceOptions.recipSensitivity);
 }
 
 // GetFrameInterval -------------------------------------------------------------------
@@ -298,5 +313,12 @@ int GetFrameInterval() {
 // Sets backlight level
 void SetBacklight(int level) {
   analogWrite(LCD_BACKLIGHT, level);
-  //digitalWrite(LCD_BACKLIGHT, HIGH);
+}
+
+void SetSensitivity(int value) {
+  // Update wheel sensitivity
+  deviceOptions.recipSensitivity = value;
+
+  // Reset previous recorded value
+  prevEncoderVal = GetEncoderValue();
 }

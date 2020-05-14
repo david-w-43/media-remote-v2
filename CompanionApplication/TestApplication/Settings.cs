@@ -29,6 +29,19 @@ namespace CompanionApplication
             txtHostname.Text = settings.TCPHostname;
             txtPort.Text = settings.TCPPort.ToString();
 
+            switch (settings.WheelSensitivity)
+            {
+                case 1:
+                    radioSensitivity100.Checked = true;
+                    break;
+                case 2:
+                    radioSensitivity50.Checked = true;
+                    break;
+                case 4:
+                    radioSensitivity25.Checked = true;
+                    break;
+            }
+
             if (settings.DisplayAlbum) { radioAlbum.Checked = true; radioArtist.Checked = false; }
             else { radioAlbum.Checked = false; radioArtist.Checked = true; }
 
@@ -89,16 +102,52 @@ namespace CompanionApplication
 
         private void btnClockSync_Click(object sender, EventArgs e)
         {
+            SyncRTC(remoteConnection);
+        }
+
+        public static void SyncRTC(RemoteConnection remoteConnection)
+        {
+            // Get current time
             DateTime t = DateTime.Now;
 
             // Chip uses 2-digit year
             int year = t.Year - 2000;
 
+            // Format time to be sent to remote
             string timeString = t.Second.ToString() + '|' + t.Minute.ToString() + '|' + t.Hour.ToString() +
                 '|' + ((int)t.DayOfWeek).ToString() + '|' + t.Day.ToString() + '|' + t.Month.ToString() +
                 '|' + year.ToString();
 
+            // Send
             remoteConnection.Send(new Command(TxCommand.SetRTCTime, timeString));
+        }
+
+        private void btnFindVLC_Click(object sender, EventArgs e)
+        {
+            // Define dialog to find VLC executable
+            OpenFileDialog dialog = new OpenFileDialog()
+            {
+                Title = "Select VLC Executable",
+                Filter = "VLC Executable|vlc.exe"
+            };
+
+            // Show dialog
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                txtVLCFilepath.Text = dialog.FileName;
+            }
+        }
+
+        private void SensitivityChanged(object sender, EventArgs e)
+        {
+            // Get value of radio button checked
+            int value = 100 / int.Parse(((RadioButton)sender).Text.TrimEnd('%'));
+
+            // Set settings value
+            Properties.Settings.Default.WheelSensitivity = value;
+
+            // Send sensitivity
+            remoteConnection.Send(new Command(TxCommand.SetSensitivity, value));
         }
     }
 }

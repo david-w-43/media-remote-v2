@@ -28,6 +28,7 @@ namespace CompanionApplication
         public static string SetMediaAppConnected = "APPC";
         public static string SetRTCTime = "UPTIM";
         public static string SetBrightness = "UPBCK";
+        public static string SetSensitivity = "UPSEN";
     }
 
     public class CommandHandler
@@ -59,25 +60,34 @@ namespace CompanionApplication
             remoteConnection.Send(new Command(TxCommand.ModeSet, (int)mode));
 
             deviceMode = mode;
+
+            // Disconnect application
+            if (applicationInterface != null)
+            {
+                applicationInterface.Disconnect();
+                applicationInterface = null;
+            }
+            systemInterface = null;
+
             switch (mode)
             {
                 case DeviceMode.Clock:
                     Console.WriteLine("Clock mode");
-                    // Disconnect if not null
-                    if (applicationInterface != null)
-                    {
-                        applicationInterface.Disconnect();
-                        applicationInterface = null;
-                    }
+                    //// Disconnect if not null
+                    //if (applicationInterface != null)
+                    //{
+                    //    applicationInterface.Disconnect();
+                    //    applicationInterface = null;
+                    //}
                     break;
                 case DeviceMode.ApplicationControl:
                     Console.WriteLine("Application control mode");
 
-                    // Disconnect if not null
-                    if (applicationInterface != null) {
-                        applicationInterface.Disconnect();
-                        applicationInterface = null;
-                    }
+                    //// Disconnect if not null
+                    //if (applicationInterface != null) {
+                    //    applicationInterface.Disconnect();
+                    //    applicationInterface = null;
+                    //}
                     
 
                     // Instantiate appropriate connection
@@ -89,7 +99,7 @@ namespace CompanionApplication
                             {
                                 try
                                 {
-                                    applicationInterface = new ApplicationMedia.VLC.Interface(ref remoteConnection, ref richPresence);
+                                    applicationInterface = new ApplicationMedia.VLC.Interface(ref remoteConnection, this, ref richPresence);
                                 }
                                 catch (System.Net.Sockets.SocketException)
                                 {
@@ -129,6 +139,19 @@ namespace CompanionApplication
                     // Handles the changing of mode
                     ModeSwitch(int.Parse(parameter));
                     break;
+                case "SETAPP":
+                    // Handles selection of media application
+                    switch (parameter)
+                    {
+                        case "iTunes":
+                            Properties.Settings.Default.ApplicationMediaInterface = (int)Interface.iTunes;
+                            break;
+                        case "VLC":
+                            Properties.Settings.Default.ApplicationMediaInterface = (int)Interface.VLC;
+                            break;
+                    }
+                    Properties.Settings.Default.Save();
+                    break;
             }
 
             // Commands for specific mode
@@ -164,7 +187,7 @@ namespace CompanionApplication
                     switch (identifier)
                     {
                         case "VOLCHANGE":
-                            //systemInterface.VolumeAdjust(int.Parse(parameter));
+                            systemInterface.VolumeAdjust(int.Parse(parameter));
                             break;
                         case "NEXT":
                             systemInterface.Next();

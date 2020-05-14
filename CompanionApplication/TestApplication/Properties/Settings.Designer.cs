@@ -118,5 +118,17 @@ namespace CompanionApplication.Properties {
                 this["DiscordRPVerbosity"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int WheelSensitivity {
+            get {
+                return ((int)(this["WheelSensitivity"]));
+            }
+            set {
+                this["WheelSensitivity"] = value;
+            }
+        }
     }
 }

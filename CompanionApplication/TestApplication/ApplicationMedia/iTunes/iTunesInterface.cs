@@ -28,22 +28,29 @@ namespace CompanionApplication.ApplicationMedia.iTunes
 
             application = new iTunesApp();
 
-            //application.OnPlayerPlayEvent += PlayEventHandler;
-            //application.OnSoundVolumeChangedEvent += VolumeChangedHandler;
-            //application.OnAboutToPromptUserToQuitEvent += Disconnect;
-
             updateTimer.Elapsed += UpdateInformation;
             updateTimer.Start();
 
             // Experimental event listeners
             application.OnPlayerPlayEvent += Application_OnPlayerPlayEvent;
             application.OnPlayerStopEvent += Application_OnPlayerStopEvent;
-            application.OnAboutToPromptUserToQuitEvent += Application_OnAboutToPromptUserToQuitEvent;
+            application.OnAboutToPromptUserToQuitEvent += OnQuitEvent;
             application.OnSoundVolumeChangedEvent += Application_OnSoundVolumeChangedEvent;
 
             remoteConnection.Send(new Command(TxCommand.SetMediaAppConnected, true));
+
+            // Push current values
+            Application_OnSoundVolumeChangedEvent(application.SoundVolume);
+            if (application.PlayerState != ITPlayerState.ITPlayerStateStopped)
+            {
+                Application_OnPlayerPlayEvent(application.CurrentTrack);
+            }
         }
 
+        /// <summary>
+        /// Called when volume is changed and when new track starts playing
+        /// </summary>
+        /// <param name="newVolume"></param>
         private void Application_OnSoundVolumeChangedEvent(int newVolume)
         {
             //Console.WriteLine("Volume: " + newVolume);
@@ -52,27 +59,44 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             {
                 PushUpdate(new List<Command>() { new Command(TxCommand.SetVolume, currentValues.volume) });
             }
-            
-            //UpdateRemote();
         }
 
-        private void Application_OnAboutToPromptUserToQuitEvent()
-        {
-            Console.WriteLine("About to quit");
+        ///// <summary>
+        ///// Called when user attempts to quit iTunes
+        ///// </summary>
+        //private void Application_OnAboutToPromptUserToQuitEvent()
+        //{
+        //    Console.WriteLine("About to quit");
 
-            // Disconnect, return to clock mode
-            commandHandler.ModeSwitch(DeviceMode.Clock);
-        }
+        //    Disconnect();
 
+        //    // Disconnect, return to clock mode
+        //    commandHandler.ModeSwitch(DeviceMode.Clock);
+        //}
+
+        /// <summary>
+        /// Called when iTunes stops playing a track
+        /// </summary>
+        /// <param name="iTrack"></param>
         private void Application_OnPlayerStopEvent(object iTrack)
         {
             //Console.WriteLine("Stopped playing");
             currentValues.playStatus = PlayStatus.stopped;
         }
 
+        /// <summary>
+        /// Called when iTunes starts playing a track
+        /// </summary>
+        /// <param name="iTrack"></param>
         private void Application_OnPlayerPlayEvent(object iTrack)
         {
-            IITTrack currentTrack = (IITTrack)iTrack;
+            // Use new track to update information
+            Console.WriteLine("New track: " + ((IITTrack)iTrack).Name);
+            UpdateTrackInformation((IITTrack)iTrack);
+        }
+
+        private void UpdateTrackInformation(IITTrack currentTrack)
+        {
             // Grab values
             currentValues.title = currentTrack.Name;
             currentValues.artist = currentTrack.Artist;
@@ -85,26 +109,30 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             List<Command> toSend = new List<Command>();
 
             // Send title
-            if (currentValues.title != prevValues.title) { toSend.Add(new Command(TxCommand.SetTitle, currentValues.title)); }
+            //if (currentValues.title != prevValues.title) {
+                toSend.Add(new Command(TxCommand.SetTitle, currentValues.title));
+            //}
 
             // Send subtitle
             if (Properties.Settings.Default.DisplayAlbum)
             {
-                if (currentValues.album != prevValues.album)
-                {
+                //if (currentValues.album != prevValues.album)
+                //{
                     toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.album));
-                }
+                //}
             }
             else
             {
-                if (currentValues.artist != prevValues.artist)
-                {
+                //if (currentValues.artist != prevValues.artist)
+                //{
                     toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.artist));
-                }
+                //}
             }
 
             // Send track length
-            if (currentValues.trackLength != prevValues.trackLength) { toSend.Add(new Command(TxCommand.SetLength, currentValues.trackLength)); }
+            //if (currentValues.trackLength != prevValues.trackLength) {
+                toSend.Add(new Command(TxCommand.SetLength, currentValues.trackLength));
+            //}
 
             // Send time
             toSend.Add(new Command(TxCommand.SetTime, application.PlayerPosition));
@@ -112,9 +140,13 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             PushUpdate(toSend);
         }
 
+        /// <summary>
+        /// Called by timer, used to get playback position, shuffle and repeat modes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void UpdateInformation(object sender, ElapsedEventArgs e)
         {
-            // Get playback position, shuffle and repeat modes
             try
             {
                 currentValues.playbackPos = application.PlayerPosition;
@@ -167,56 +199,6 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             
         }
 
-        //private void UpdateRemote()
-        //{
-        //    // List of commands to send
-        //    List<Command> toSend = new List<Command>();
-
-        //    // Shorthand for settings
-        //    var settings = Properties.Settings.Default;
-
-        //    // If changed, add to list of commands to send
-        //    if ((currentValues.title != prevValues.title)) { toSend.Add(new Command(TxCommand.SetTitle, currentValues.title)); }
-        //    //if (((currentValues.artist != prevValues.artist)) && !settings.DisplayAlbum) { toSend.Add(new Command("ARTIST", currentValues.artist)); }
-        //    if ((currentValues.trackLength != prevValues.trackLength)) { toSend.Add(new Command(TxCommand.SetLength, currentValues.trackLength)); }
-        //    //if (((currentValues.album != prevValues.album)) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
-
-        //    if (settings.DisplayAlbum)
-        //    {
-        //        if (currentValues.album != prevValues.album)
-        //        {
-        //            toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.album));
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (currentValues.artist != prevValues.artist)
-        //        {
-        //            toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.artist));
-        //        }
-        //    }
-
-        //    // Send updated data to remote
-        //    if ((currentValues.volume != prevValues.volume)) { toSend.Add(new Command(TxCommand.SetVolume, (int)currentValues.volume)); }
-        //    if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command(TxCommand.SetStatus, (int)currentValues.playStatus)); }
-        //    if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command(TxCommand.SetTime, currentValues.playbackPos)); }
-
-        //    // Shuffle
-        //    if (currentValues.shuffle != prevValues.shuffle)
-        //    {
-        //        toSend.Add(new Command(TxCommand.SetShuffle, currentValues.shuffle));
-        //    }
-
-        //    // Repeat mode
-        //    if (currentValues.repeatMode != prevValues.repeatMode)
-        //    {
-        //        toSend.Add(new Command(TxCommand.SetRepeatMode, (int)currentValues.repeatMode));
-        //    }
-
-        //    // Send data to remote
-        //    PushUpdate(toSend);
-        //}
-
         public override void Next() { application.NextTrack(); }
 
         public override void Prev() { application.BackTrack(); }
@@ -260,7 +242,7 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             // Experimental event listeners
             application.OnPlayerPlayEvent -= Application_OnPlayerPlayEvent;
             application.OnPlayerStopEvent -= Application_OnPlayerStopEvent;
-            application.OnAboutToPromptUserToQuitEvent -= Application_OnAboutToPromptUserToQuitEvent;
+            application.OnAboutToPromptUserToQuitEvent -= OnQuitEvent;
             application.OnSoundVolumeChangedEvent -= Application_OnSoundVolumeChangedEvent;
 
             System.Threading.Thread.Sleep(100);
@@ -269,9 +251,8 @@ namespace CompanionApplication.ApplicationMedia.iTunes
             {
                 // Pause playback
                 application.Pause();
-
                 System.Runtime.InteropServices.Marshal.ReleaseComObject(application);
-                //System.GC.Collect();
+                GC.Collect();
             }
             catch (System.Runtime.InteropServices.InvalidComObjectException ex)
             {

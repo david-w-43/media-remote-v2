@@ -109,6 +109,9 @@ void serialEvent() {
             // Sets the time on the RTC
             rtc.setDateTime(second, minute, hour, dayOfWeek, dayOfMonth, month, year);
           }
+          else if (identifier == "UPSEN") {
+            SetSensitivity(parameter.toInt());
+          }
 
           // Update EEPROM
           EEPROM.put(EEPROM_OPTIONS, deviceOptions);
@@ -124,9 +127,6 @@ void serialEvent() {
             break;
           case SystemMedia:
             SystemMediaCommands(identifier, parameter);
-            break;
-          case Menu:
-            MenuCommands(identifier, parameter);
             break;
         }
       } else {
@@ -176,10 +176,6 @@ void ApplicationControlCommands(String identifier, String parameter) {
 }
 
 void SystemMediaCommands(String identifier, String parameter) {
-  // Nothing yet
-}
-
-void MenuCommands(String identifier, String parameter) {
   // Nothing yet
 }
 

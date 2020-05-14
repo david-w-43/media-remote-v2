@@ -56,7 +56,7 @@ void DisplayApplicationControl() {
   if (applicationPlaying) {
 
     // Find difference in encoder value, send as change in volume
-    int encoderValue = enc.read();
+    int encoderValue = GetEncoderValue();
     int encoderDifference = prevEncoderVal - encoderValue;
     if (encoderDifference != 0)
     {
@@ -65,19 +65,19 @@ void DisplayApplicationControl() {
     prevEncoderVal = encoderValue;
 
     // Detect new button presses and send appropriate command
-    if (btnA.wasPressed()) {
+    if (btnA.wasReleased()) {
       Serial.println("PREV()");
     }
-    if (btnB.wasPressed()) {
+    if (btnB.wasReleased()) {
       Serial.println("REPEAT()");
     }
-    if (btnC.wasPressed()) {
+    if (btnC.wasReleased()) {
       Serial.println("SHUFFLE()");
     }
-    if (btnD.wasPressed()) {
+    if (btnD.wasReleased()) {
       Serial.println("NEXT()");
     }
-    if (btnENC.wasPressed()) {
+    if (btnENC.wasReleased()) {
       Serial.println("PAUSE()");
     }
 

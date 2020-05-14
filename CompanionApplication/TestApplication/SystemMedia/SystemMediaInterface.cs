@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AudioSwitcher.AudioApi.CoreAudio;
 
 namespace CompanionApplication.SystemMedia
 {
@@ -13,6 +14,8 @@ namespace CompanionApplication.SystemMedia
             Next = 0xB0,
             Pause = 0xB3,
             Prev = 0xB1,
+            VolUp = 0xAF,
+            VolDown = 0xAE
         }
 
         private RemoteConnection remoteConnection;
@@ -57,7 +60,10 @@ namespace CompanionApplication.SystemMedia
         /// <param name="change"></param>
         public void VolumeAdjust(int change)
         {
-            //remoteConnection.Send(new Command(TxCommand.SetVolume, (int)audioController.Adjust(change)));
+            //int newVolume = audioController.Adjust(change);
+            //remoteConnection.Send(new Command(TxCommand.SetVolume, newVolume));
+            if (change > 0) { SendKey(MultimediaKey.VolUp); }
+            else if (change < 0) { SendKey(MultimediaKey.VolDown); }
         }
     }
 }

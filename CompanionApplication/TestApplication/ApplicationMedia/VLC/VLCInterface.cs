@@ -12,12 +12,13 @@ namespace CompanionApplication.ApplicationMedia.VLC
     class Interface : ApplicationInterface
     {
         private Networking.Client client;
+        private bool isConnected;
 
         /// <summary>
         /// Initiates connection to TCP socket
         /// </summary>
         /// <param name="remoteConnection">Serial connection to remote</param>
-        public Interface(ref RemoteConnection remoteConnection, ref Discord.DiscordRichPresence richPresence)
+        public Interface(ref RemoteConnection remoteConnection, CommandHandler commandHandler, ref Discord.DiscordRichPresence richPresence)
         {
             try
             {
@@ -26,6 +27,8 @@ namespace CompanionApplication.ApplicationMedia.VLC
 
                 this.remoteConnection = remoteConnection;
                 this.richPresence = richPresence;
+                this.commandHandler = commandHandler;
+
                 currentValues.player = ApplicationMedia.Interface.VLC;
 
                 if (richPresence.IsDisposed()) { richPresence = new Discord.DiscordRichPresence(); }
@@ -47,11 +50,14 @@ namespace CompanionApplication.ApplicationMedia.VLC
                 // Start timer to update metadata
                 updateTimer.Elapsed += UpdateInformation;
                 updateTimer.Start();
+                isConnected = true;
             }
             catch (System.Net.Sockets.SocketException)
             {
                 var settings = Properties.Settings.Default;
                 string arguments = "--cli-host=\"" + settings.TCPHostname + ":" + settings.TCPPort + "\"";
+
+                // Start VLC with required parameters
                 System.Diagnostics.Process.Start(Properties.Settings.Default.VLCPath, arguments);
                 throw;
             }
@@ -67,186 +73,201 @@ namespace CompanionApplication.ApplicationMedia.VLC
         /// <param name="e"></param>
         protected void UpdateInformation(object sender, System.Timers.ElapsedEventArgs e)
         {
-            // List of commands to send to remote
-            List<Command> toSend = new List<Command>();
-
-            // Gets filepath, volume and playback status
-            client.SendLine("status");
-            List<string> received = client.ReadLines();
-
-            filepathFound = stateFound = volumeFound = false;
-
-            foreach (string line in received)
+            if (isConnected)
             {
-                //Console.WriteLine(line);
-                if (line.Contains("new input"))
+                try
                 {
-                    // Parse filepath
-                    //Console.WriteLine(line);
-                    int start = line.IndexOf(':') + 2;
-                    int end = line.LastIndexOf(" )");
-                    currentValues.filepath = line.Substring(start, end - start);
-                    filepathFound = true;
-                    //Console.WriteLine(currentValues.filepath);
-                } else if (line.Contains("audio volume"))
-                {
-                    // If volume was not changed by remote
-                    if (currentValues.volume == prevValues.volume)
+                    // List of commands to send to remote
+                    List<Command> toSend = new List<Command>();
+
+                    // Gets filepath, volume and playback status
+                    client.SendLine("status");
+                    List<string> received = client.ReadLines();
+
+                    filepathFound = stateFound = volumeFound = false;
+
+                    foreach (string line in received)
                     {
-                        // Parse volume
                         //Console.WriteLine(line);
-                        int start = line.IndexOf(':') + 2;
-                        int end = line.LastIndexOf(" )");
-                        string substring = line.Substring(start, end - start);
-                        //Console.WriteLine(substring);
-                        int.TryParse(substring, out int volume);
-                        currentValues.volume = MapTo100(volume);
-                        volumeFound = true;
-                        //Console.WriteLine(currentValues.volume);
+                        if (line.Contains("new input"))
+                        {
+                            // Parse filepath
+                            //Console.WriteLine(line);
+                            int start = line.IndexOf(':') + 2;
+                            int end = line.LastIndexOf(" )");
+                            currentValues.filepath = line.Substring(start, end - start);
+                            filepathFound = true;
+                            //Console.WriteLine(currentValues.filepath);
+                        }
+                        else if (line.Contains("audio volume"))
+                        {
+                            // If volume was not changed by remote
+                            if (currentValues.volume == prevValues.volume)
+                            {
+                                // Parse volume
+                                //Console.WriteLine(line);
+                                int start = line.IndexOf(':') + 2;
+                                int end = line.LastIndexOf(" )");
+                                string substring = line.Substring(start, end - start);
+                                //Console.WriteLine(substring);
+                                int.TryParse(substring, out int volume);
+                                currentValues.volume = MapTo100(volume);
+                                volumeFound = true;
+                                //Console.WriteLine(currentValues.volume);
+                            }
+                        }
+                        else if (line.Contains("state"))
+                        {
+                            // Parse play status
+                            //Console.WriteLine(line);
+                            int start = line.IndexOf(' ');
+                            int end = line.LastIndexOf(" )");
+                            string parsed = line.Substring(start, end - start);
+                            switch (parsed)
+                            {
+                                case "playing":
+                                    currentValues.playStatus = PlayStatus.playing;
+                                    break;
+                                case "paused":
+                                    currentValues.playStatus = PlayStatus.paused;
+                                    break;
+                                case "stopped":
+                                    currentValues.playStatus = PlayStatus.stopped;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            stateFound = true;
+                            //Console.WriteLine(currentValues.volume);
+                        }
                     }
-                } else if (line.Contains("state"))
-                {
-                    // Parse play status
-                    //Console.WriteLine(line);
-                    int start = line.IndexOf(' ');
-                    int end = line.LastIndexOf(" )");
-                    string parsed = line.Substring(start, end - start);
-                    switch (parsed)
+
+                    // Get current time
+                    client.SendLine("get_time");
+                    received = client.ReadLines();
+                    foreach (string line in received)
                     {
-                        case "playing":
-                            currentValues.playStatus = PlayStatus.playing;
-                            break;
-                        case "paused":
-                            currentValues.playStatus = PlayStatus.paused;
-                            break;
-                        case "stopped":
-                            currentValues.playStatus = PlayStatus.stopped;
-                            break;
-                        default:
-                            break;
+                        //Console.WriteLine(line);
+                        string trimmed = line.Trim();
+                        if (int.TryParse(line, out int parsed)) { currentValues.playbackPos = parsed; }
+                        //Console.WriteLine(currentValues.playbackPos);
                     }
-                    stateFound = true;
-                    //Console.WriteLine(currentValues.volume);
+
+                    // Checks if the track is new
+                    if ((!Equals(currentValues.filepath, prevValues.filepath) || !lengthFound) && filepathFound)
+                    {
+                        artistFound = albumFound = titleFound = lengthFound = typeFound = false;
+                        //currentValues.mediaType = MediaType.audio;
+
+                        // Request track metadata
+                        client.SendLine("info");
+                        received = client.ReadLines();
+                        foreach (string line in received)
+                        {
+                            //Console.WriteLine(line);
+                            if (line.StartsWith("| artist:"))
+                            {
+                                // Parse artist
+                                int start = line.IndexOf(':') + 2;
+                                currentValues.artist = line.Substring(start);
+                                artistFound = true;
+                            }
+                            else if (line.StartsWith("| album:"))
+                            {
+                                // Parse album
+                                int start = line.IndexOf(':') + 2;
+                                currentValues.album = line.Substring(start);
+                                albumFound = true;
+                            }
+                            else if (line.StartsWith("| title:"))
+                            {
+                                // Parse title
+                                int start = line.IndexOf(':') + 2;
+                                currentValues.title = line.Substring(start);
+                                titleFound = true;
+                            }
+                            else if (line.Contains("| Type:") && !typeFound)
+                            {
+                                typeFound = true;
+
+                                if (line.Contains("Video"))
+                                {
+                                    currentValues.mediaType = MediaType.video;
+                                }
+                                else
+                                {
+                                    currentValues.mediaType = MediaType.audio;
+                                }
+                            }
+                        }
+
+                        // Get track length
+                        client.SendLine("get_length");
+                        received = client.ReadLines();
+                        foreach (string line in received)
+                        {
+                            //Console.WriteLine(line);
+                            string trimmed = line.Trim();
+                            if (int.TryParse(line, out int parsed)) { currentValues.trackLength = parsed; }
+                            lengthFound = true;
+                        }
+
+                        // If values not found, substitute
+                        if (!titleFound) { currentValues.title = currentValues.filepath.Split('/').Last(); } // File name
+                        if (!artistFound) { currentValues.artist = "Unknown Artist"; }
+                        if (!albumFound) { currentValues.album = "Unknown Album"; }
+
+                        // Shorthand for settings
+                        var settings = Properties.Settings.Default;
+
+                        // If changed, add to list of commands to send
+                        if ((currentValues.title != prevValues.title) || !titleFound) { toSend.Add(new Command(TxCommand.SetTitle, currentValues.title)); }
+
+                        //if (((currentValues.artist != prevValues.artist) || !artistFound) &&  !settings.DisplayAlbum) { toSend.Add(new Command("ARTIST", currentValues.artist)); }
+                        //if (((currentValues.album != prevValues.album) || !albumFound) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
+
+                        //if ((currentValues.artist != prevValues.artist) || (currentValues.album != prevValues.album))
+                        //{
+                        //    toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.GetSubtitle()));
+                        //}
+
+                        switch (currentValues.mediaType)
+                        {
+                            case MediaType.audio:
+                                if (Properties.Settings.Default.DisplayAlbum)
+                                {
+                                    toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.album));
+                                }
+                                else
+                                {
+                                    toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.artist));
+                                }
+                                break;
+                            case MediaType.video:
+                                string[] elements = currentValues.filepath.Split('/');
+                                toSend.Add(new Command(TxCommand.SetSubtitle, elements[elements.Length - 2]));
+                                break;
+                        }
+
+
+                        if ((currentValues.trackLength != prevValues.trackLength) || !lengthFound) { toSend.Add(new Command(TxCommand.SetLength, currentValues.trackLength)); }
+                    }
+
+                    // Send updated data to remote
+                    if ((currentValues.volume != prevValues.volume) || !volumeFound) { toSend.Add(new Command(TxCommand.SetVolume, (int)currentValues.volume)); }
+                    if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command(TxCommand.SetStatus, (int)currentValues.playStatus)); }
+                    if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command(TxCommand.SetTime, currentValues.playbackPos)); }
+
+                    PushUpdate(toSend);
+
                 }
-            }
-            
-            // Get current time
-            client.SendLine("get_time");
-            received = client.ReadLines();
-            foreach (string line in received)
-            {
-                //Console.WriteLine(line);
-                string trimmed = line.Trim();
-                if (int.TryParse(line, out int parsed)) { currentValues.playbackPos = parsed; }
-                //Console.WriteLine(currentValues.playbackPos);
-            }
-
-            // Checks if the track is new
-            if ((!Equals(currentValues.filepath, prevValues.filepath) || !lengthFound) && filepathFound)
-            {
-                artistFound = albumFound = titleFound = lengthFound = typeFound = false;
-                //currentValues.mediaType = MediaType.audio;
-
-                // Request track metadata
-                client.SendLine("info");
-                received = client.ReadLines();
-                foreach (string line in received)
+                catch (System.Net.Sockets.SocketException)
                 {
-                    //Console.WriteLine(line);
-                    if (line.StartsWith("| artist:"))
-                    {
-                        // Parse artist
-                        int start = line.IndexOf(':') + 2;
-                        currentValues.artist = line.Substring(start);
-                        artistFound = true;
-                    }
-                    else if (line.StartsWith("| album:"))
-                    {
-                        // Parse album
-                        int start = line.IndexOf(':') + 2;
-                        currentValues.album = line.Substring(start);
-                        albumFound = true;
-                    }
-                    else if (line.StartsWith("| title:"))
-                    {
-                        // Parse title
-                        int start = line.IndexOf(':') + 2;
-                        currentValues.title = line.Substring(start);
-                        titleFound = true;
-                    }
-                    else if (line.Contains("| Type:") && !typeFound)
-                    {
-                        typeFound = true;
-
-                        if (line.Contains("Video"))
-                        {
-                            currentValues.mediaType = MediaType.video;
-                        }
-                        else
-                        {
-                            currentValues.mediaType = MediaType.audio;
-                        }
-                    }
+                    // Happens when disconnected
+                    isConnected = false;
+                    OnQuitEvent();
                 } 
-
-                // Get track length
-                client.SendLine("get_length");
-                received = client.ReadLines();
-                foreach (string line in received)
-                {
-                    //Console.WriteLine(line);
-                    string trimmed = line.Trim();
-                    if (int.TryParse(line, out int parsed)) { currentValues.trackLength = parsed; }
-                    lengthFound = true;
-                }
-
-                // If values not found, substitute
-                if (!titleFound) { currentValues.title = currentValues.filepath.Split('/').Last(); } // File name
-                if (!artistFound) { currentValues.artist = "Unknown Artist"; }
-                if (!albumFound) { currentValues.album = "Unknown Album"; }
-
-                // Shorthand for settings
-                var settings = Properties.Settings.Default;
-
-                // If changed, add to list of commands to send
-                if ((currentValues.title != prevValues.title) || !titleFound) { toSend.Add(new Command(TxCommand.SetTitle, currentValues.title)); }
-
-                //if (((currentValues.artist != prevValues.artist) || !artistFound) &&  !settings.DisplayAlbum) { toSend.Add(new Command("ARTIST", currentValues.artist)); }
-                //if (((currentValues.album != prevValues.album) || !albumFound) && settings.DisplayAlbum) { toSend.Add(new Command("ALBUM", currentValues.album)); }
-
-                //if ((currentValues.artist != prevValues.artist) || (currentValues.album != prevValues.album))
-                //{
-                //    toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.GetSubtitle()));
-                //}
-
-                switch (currentValues.mediaType)
-                {
-                    case MediaType.audio:
-                        if (Properties.Settings.Default.DisplayAlbum)
-                        {
-                            toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.album));
-                        }
-                        else
-                        {
-                            toSend.Add(new Command(TxCommand.SetSubtitle, currentValues.artist));
-                        }
-                        break;
-                    case MediaType.video:
-                        string[] elements = currentValues.filepath.Split('/');
-                        toSend.Add(new Command(TxCommand.SetSubtitle, elements[elements.Length - 2]));
-                        break;
-                }
-                
-
-                if ((currentValues.trackLength != prevValues.trackLength) || !lengthFound ) { toSend.Add(new Command(TxCommand.SetLength, currentValues.trackLength)); }
             }
-
-            // Send updated data to remote
-            if ((currentValues.volume != prevValues.volume) || !volumeFound) { toSend.Add(new Command(TxCommand.SetVolume, (int)currentValues.volume)); }
-            if (currentValues.playStatus != prevValues.playStatus) { toSend.Add(new Command(TxCommand.SetStatus, (int)currentValues.playStatus)); }
-            if (currentValues.playbackPos != prevValues.playbackPos) { toSend.Add(new Command(TxCommand.SetTime, currentValues.playbackPos)); }
-
-            PushUpdate(toSend);
         }
 
         /// <summary>
@@ -380,8 +401,13 @@ namespace CompanionApplication.ApplicationMedia.VLC
             updateTimer.Elapsed -= UpdateInformation;
             updateTimer.Stop();
 
-            // Stop playback
-            client.SendLine("stop");
+            // Stop playback if still connected to console
+            if (isConnected)
+            {
+                client.SendLine("stop");
+                client.Disconnect();
+            }
+            
             richPresence.Dispose();
         }
     }

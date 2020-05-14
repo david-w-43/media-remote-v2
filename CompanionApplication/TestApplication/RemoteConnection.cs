@@ -162,7 +162,7 @@ namespace CompanionApplication
 
             List<string> systemPorts = new List<string>(); // Define list of system ports
             //Try last used port first
-            if (settings.connectedPortName != "") // If not empty
+            if ((settings.connectedPortName != "") && (System.IO.Ports.SerialPort.GetPortNames().Contains(settings.connectedPortName))) // If not empty
             {
                 systemPorts.Add(settings.connectedPortName); // Add last used port to front of list
             }
@@ -243,6 +243,9 @@ namespace CompanionApplication
 
                     // Request current device mode
                     Send(new Command(TxCommand.ModeQuery));
+
+                    // Update RTC with system time
+                    Settings.SyncRTC(this);
                 }
             }
             if (!connected) { throw new System.IO.IOException("Iterated through all (" + systemPorts.Count + ") ports and remote was not found"); }

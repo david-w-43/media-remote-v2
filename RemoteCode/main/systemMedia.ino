@@ -13,7 +13,7 @@ void DisplaySystemMedia(){
   lcd.clearBuffer();
   
   // Find difference in encoder value, send as change in volume
-  int encoderValue = enc.read();
+  int encoderValue = GetEncoderValue();
   int encoderDifference = prevEncoderVal - encoderValue;
   if (encoderDifference != 0)
   {
@@ -22,13 +22,13 @@ void DisplaySystemMedia(){
   prevEncoderVal = encoderValue;
 
   // Detect new button presses and send appropriate command
-  if (btnA.wasPressed()) {
+  if (btnA.wasReleased()) {
     Serial.println("PREV()");
   }
-  if (btnD.wasPressed()) {
+  if (btnD.wasReleased()) {
     Serial.println("NEXT()");
   }
-  if (btnENC.wasPressed()) {
+  if (btnENC.wasReleased()) {
     Serial.println("PAUSE()");
   }
 

@@ -32,12 +32,12 @@ namespace CompanionApplication
                     new MenuItem("-"), // Separator
                     new MenuItem("Backlight", new MenuItem[]
                     {
-                        new MenuItem("100%", SetBacklight) { RadioCheck = true },
-                        new MenuItem("80%", SetBacklight) { RadioCheck = true },
-                        new MenuItem("60%", SetBacklight) { RadioCheck = true },
-                        new MenuItem("40%", SetBacklight) { RadioCheck = true },
-                        new MenuItem("20%", SetBacklight) { RadioCheck = true },
-                        new MenuItem("10%", SetBacklight) { RadioCheck = true }
+                        new MenuItem("100%", SetBacklight),
+                        new MenuItem("80%", SetBacklight),
+                        new MenuItem("60%", SetBacklight),
+                        new MenuItem("40%", SetBacklight),
+                        new MenuItem("20%", SetBacklight),
+                        new MenuItem("10%", SetBacklight)
                     }),
                     new MenuItem("-"), // Separator
                     new MenuItem("Discord", new MenuItem[]
@@ -266,16 +266,17 @@ namespace CompanionApplication
 
         void SetBacklight(object sender, EventArgs e)
         {
-            // Uncheck all menuitems and check sender
-            foreach (MenuItem item in ((MenuItem)sender).Parent.MenuItems)
-            {
-                item.Checked = false;
-            }
-            ((MenuItem)sender).Checked = true;
+            //// Uncheck all menuitems and check sender
+            //foreach (MenuItem item in ((MenuItem)sender).Parent.MenuItems)
+            //{
+            //    item.Checked = false;
+            //}
+            //((MenuItem)sender).Checked = true;
 
 
             // Get value of button
             float value = int.Parse(((MenuItem)sender).Text.TrimEnd('%')) / 100f;
+            // Use quadratic approximation for perceived brightness
             int scaled = (int)Math.Round((Math.Pow(value, 2) * 255));
 
             connection.Send(new Command(TxCommand.SetBrightness, scaled));
