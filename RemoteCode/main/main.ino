@@ -97,7 +97,7 @@ Encoder enc(ENC1, ENC2);
 #define EEPROM_OPTIONS 0
 
 // Enumerators
-enum DeviceMode { Clock, ApplicationControl, SystemMedia};
+enum DeviceMode { Clock, ApplicationControl};
 
 // Options
 struct DeviceOptions {
@@ -263,9 +263,6 @@ void loop() {
         break;
       case ApplicationControl:
         DisplayApplicationControl();
-        break;
-      case SystemMedia:
-        DisplaySystemMedia();
         break;
     }
   }

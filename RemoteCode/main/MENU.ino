@@ -6,8 +6,7 @@ void DisplayMenu() {
   String options[4] = {
     "Clock",
     "iTunes",
-    "VLC",
-    "System"
+    "VLC"
   };
 
   // Draw menu ----------------------------------------
@@ -47,7 +46,7 @@ void DisplayMenu() {
     // Sets encoder change based on turn direction
     if (encoderValue < prevEncoderVal) {
       // Increment selected option, with wraparound
-        if (selectedMenuItem >= 3) {
+        if (selectedMenuItem >= 2) {
           selectedMenuItem = 0;
         }
         else {
@@ -57,7 +56,7 @@ void DisplayMenu() {
     else if (encoderValue > prevEncoderVal) {
       // Decrement selected option, with wraparound
         if (selectedMenuItem <= 0) {
-          selectedMenuItem = 3;
+          selectedMenuItem = 2;
         }
         else {
           selectedMenuItem --;
@@ -92,9 +91,6 @@ void DisplayMenu() {
         case 2:
           Serial.println("SETAPP(VLC)");
           SetMode(ApplicationControl);
-          break;
-        case 3:
-          SetMode(SystemMedia);
           break;
       }
 

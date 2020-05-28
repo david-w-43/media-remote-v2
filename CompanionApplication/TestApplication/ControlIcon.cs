@@ -14,7 +14,7 @@ namespace CompanionApplication
         public CommandHandler commandHandler;
         private Discord.DiscordRichPresence richPresence;
 
-        private MenuItem VLCSwitch, iTunesSwitch, clockSwitch, systemSwitch;
+        private MenuItem VLCSwitch, iTunesSwitch, clockSwitch/*, systemSwitch*/;
         private MenuItem DVOff, DVFull, DVLimited;
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace CompanionApplication
                     clockSwitch = new MenuItem("Clock", SetMode) {RadioCheck = true },
                     iTunesSwitch = new MenuItem("iTunes", SetMode) {RadioCheck = true },
                     VLCSwitch = new MenuItem("VLC", SetMode) {RadioCheck = true },
-                    systemSwitch = new MenuItem("System", SetMode) {RadioCheck = true },
+                    //systemSwitch = new MenuItem("System", SetMode) {RadioCheck = true },
 
                     new MenuItem("-"), // Separator
                     new MenuItem("Exit", Exit), // Exits application
@@ -105,7 +105,7 @@ namespace CompanionApplication
             DeviceMode mode = commandHandler.GetDeviceMode();
 
             // Set all to unchecked
-            clockSwitch.Checked = iTunesSwitch.Checked = VLCSwitch.Checked = systemSwitch.Checked = false;
+            clockSwitch.Checked = iTunesSwitch.Checked = VLCSwitch.Checked /*= systemSwitch.Checked */ = false;
 
             // Set appropriate checkbox
             switch (mode)
@@ -124,9 +124,9 @@ namespace CompanionApplication
                             break;
                     }
                     break;
-                case DeviceMode.SystemMedia:
-                    systemSwitch.Checked = true;
-                    break;
+                //case DeviceMode.SystemMedia:
+                //    systemSwitch.Checked = true;
+                //    break;
             }
 
             // Update Discord RP verbosity
@@ -222,9 +222,9 @@ namespace CompanionApplication
                     commandHandler.ModeSwitch(DeviceMode.ApplicationControl);
                     //commandHandler.RefreshApplication();
                     break;
-                case "System":
-                    commandHandler.ModeSwitch(DeviceMode.SystemMedia);
-                    break;
+                //case "System":
+                //    commandHandler.ModeSwitch(DeviceMode.SystemMedia);
+                //    break;
                 case "Clock":
                     commandHandler.ModeSwitch(DeviceMode.Clock);
                     break;

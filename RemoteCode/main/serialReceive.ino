@@ -125,9 +125,6 @@ void serialEvent() {
           case ApplicationControl:
             ApplicationControlCommands(identifier, parameter);
             break;
-          case SystemMedia:
-            SystemMediaCommands(identifier, parameter);
-            break;
         }
       } else {
         // If mismatched length detected
@@ -173,10 +170,6 @@ void ApplicationControlCommands(String identifier, String parameter) {
   else if (identifier == "STAT") {
     currentValues.playbackStatus = (PlaybackStatus)parameter.toInt();
   }
-}
-
-void SystemMediaCommands(String identifier, String parameter) {
-  // Nothing yet
 }
 
 String getParameter(String data, char separator, int index)

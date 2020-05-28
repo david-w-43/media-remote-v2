@@ -8,7 +8,7 @@ using CompanionApplication.SystemMedia;
 
 namespace CompanionApplication
 {
-    public enum DeviceMode { Clock, ApplicationControl, SystemMedia, Menu };
+    public enum DeviceMode { Clock, ApplicationControl, Menu };
 
     public static class TxCommand
     {
@@ -79,6 +79,11 @@ namespace CompanionApplication
                     //    applicationInterface.Disconnect();
                     //    applicationInterface = null;
                     //}
+
+                    Console.WriteLine("Media mode");
+                    applicationInterface = null;
+                    systemInterface = new SystemMediaInterface(ref remoteConnection);
+
                     break;
                 case DeviceMode.ApplicationControl:
                     Console.WriteLine("Application control mode");
@@ -114,11 +119,11 @@ namespace CompanionApplication
                             break;
                     }
                     break;
-                case DeviceMode.SystemMedia:
-                    Console.WriteLine("Media mode");
-                    applicationInterface = null;
-                    systemInterface = new SystemMediaInterface(ref remoteConnection);
-                    break;
+                //case DeviceMode.SystemMedia:
+                //    Console.WriteLine("Media mode");
+                //    applicationInterface = null;
+                //    systemInterface = new SystemMediaInterface(ref remoteConnection);
+                //    break;
                 case DeviceMode.Menu:
                     Console.WriteLine("Menu mode");
                     break;
@@ -158,6 +163,21 @@ namespace CompanionApplication
             switch (deviceMode)
             {
                 case DeviceMode.Clock:
+                    switch (identifier)
+                    {
+                        case "VOLCHANGE":
+                            systemInterface.VolumeAdjust(int.Parse(parameter));
+                            break;
+                        case "NEXT":
+                            systemInterface.Next();
+                            break;
+                        case "PREV":
+                            systemInterface.Prev();
+                            break;
+                        case "PAUSE":
+                            systemInterface.Pause();
+                            break;
+                    }
                     break;
                 case DeviceMode.ApplicationControl:
                     switch (identifier)
@@ -183,23 +203,23 @@ namespace CompanionApplication
                     }
 
                     break;
-                case DeviceMode.SystemMedia:
-                    switch (identifier)
-                    {
-                        case "VOLCHANGE":
-                            systemInterface.VolumeAdjust(int.Parse(parameter));
-                            break;
-                        case "NEXT":
-                            systemInterface.Next();
-                            break;
-                        case "PREV":
-                            systemInterface.Prev();
-                            break;
-                        case "PAUSE":
-                            systemInterface.Pause();
-                            break;
-                    }
-                    break;
+                //case DeviceMode.SystemMedia:
+                //    switch (identifier)
+                //    {
+                //        case "VOLCHANGE":
+                //            systemInterface.VolumeAdjust(int.Parse(parameter));
+                //            break;
+                //        case "NEXT":
+                //            systemInterface.Next();
+                //            break;
+                //        case "PREV":
+                //            systemInterface.Prev();
+                //            break;
+                //        case "PAUSE":
+                //            systemInterface.Pause();
+                //            break;
+                //    }
+                //    break;
                 case DeviceMode.Menu:
                     break;
             }

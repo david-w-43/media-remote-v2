@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <configSections>
+        <sectionGroup name="userSettings" type="System.Configuration.UserSettingsGroup, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" >
+            <section name="CompanionApplication.Properties.Settings" type="System.Configuration.ClientSettingsSection, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" allowExeDefinition="MachineToLocalUser" requirePermission="false" />
+            <section name="TestApplication.Properties.Settings" type="System.Configuration.ClientSettingsSection, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" allowExeDefinition="MachineToLocalUser" requirePermission="false" />
+        </sectionGroup>
+    </configSections>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+    </startup>
+    <userSettings>
+        <CompanionApplication.Properties.Settings>
+            <setting name="connectedPortName" serializeAs="String">
+                <value>COM7</value>
+            </setting>
+            <setting name="TCPHostname" serializeAs="String">
+                <value>localhost</value>
+            </setting>
+            <setting name="TCPPort" serializeAs="String">
+                <value>4213</value>
+            </setting>
+            <setting name="VLCPath" serializeAs="String">
+                <value>C:\Program Files (x86)\VideoLAN\VLC\vlc.exe</value>
+            </setting>
+            <setting name="DisplayAlbum" serializeAs="String">
+                <value>False</value>
+            </setting>
+            <setting name="ScrollLongText" serializeAs="String">
+                <value>True</value>
+            </setting>
+            <setting name="ApplicationMediaInterface" serializeAs="String">
+                <value>0</value>
+            </setting>
+            <setting name="DiscordRPVerbosity" serializeAs="String">
+                <value>0</value>
+            </setting>
+            <setting name="WheelSensitivity" serializeAs="String">
+                <value>1</value>
+            </setting>
+        </CompanionApplication.Properties.Settings>
+        <TestApplication.Properties.Settings>
+            <setting name="connectedPortName" serializeAs="String">
+                <value />
+            </setting>
+            <setting name="TCPHostname" serializeAs="String">
+                <value>localhost</value>
+            </setting>
+            <setting name="TCPPort" serializeAs="String">
+                <value>4213</value>
+            </setting>
+        </TestApplication.Properties.Settings>
+    </userSettings>
+</configuration>

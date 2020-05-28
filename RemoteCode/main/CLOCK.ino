@@ -48,4 +48,25 @@ void DisplayClock() {
   lcd.print(temperatureStr);
   
   lcd.sendBuffer();
+
+  // Handles basic control
+  // Find difference in encoder value, send as change in volume
+  int encoderValue = GetEncoderValue();
+  int encoderDifference = prevEncoderVal - encoderValue;
+  if (encoderDifference != 0)
+  {
+    Serial.println("VOLCHANGE(" + (String)encoderDifference + ")");
+  }
+  prevEncoderVal = encoderValue;
+
+  // Detect new button presses and send appropriate command
+  if (btnA.wasReleased()) {
+    Serial.println("PREV()");
+  }
+  if (btnD.wasReleased()) {
+    Serial.println("NEXT()");
+  }
+  if (btnENC.wasReleased()) {
+    Serial.println("PAUSE()");
+  }
 }
