@@ -1,6 +1,7 @@
 # Media remote
-### Version 2 - Work in progress
+### Version 2
 
+<img src="./docs/images/headerImage.jpg" width="100%"> 
 
 ## Current Features:
 - Clock mode
@@ -9,6 +10,11 @@
 
     - Ambient temperature display
     - Real-time clock displaying time and date
+    - Whole-system audio control
+        - Volume
+        - Play / pause
+        - Next / previous track
+        
 - Media Application Control mode
 
     <img src="./docs/images/mediaapplicationmode.jpg" width="420"> 
@@ -30,17 +36,13 @@
         <img src="./docs/images/discordRP.jpg"> 
 
         - Adjustable privacy
+        
 - Configurable backlight brightness
 
     <img src="./docs/images/backlightselect.jpg"> 
-
+    
+- Adjustable rotary encoder sensitivity
 - Long text scrolls across display
-
-### Planned features:
-- System Media Control mode:
-    - Switch between audio devices
-    - Adjust system-wide volume
-    - Simulate multimedia keys for basic control over many applications
 
 ## Hardware
 
