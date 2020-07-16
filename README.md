@@ -3,7 +3,7 @@
 
 <img src="./docs/images/headerImage.jpg" width="100%"> 
 
-## Current Features:
+## Features:
 - Clock mode
 
     <img src="./docs/images/clockmode.jpg" width="420"> 
