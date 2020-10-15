@@ -130,5 +130,17 @@ namespace CompanionApplication.Properties {
                 this["WheelSensitivity"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DiscordPrefixEnable {
+            get {
+                return ((bool)(this["DiscordPrefixEnable"]));
+            }
+            set {
+                this["DiscordPrefixEnable"] = value;
+            }
+        }
     }
 }

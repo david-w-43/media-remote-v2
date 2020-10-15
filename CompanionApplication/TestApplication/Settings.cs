@@ -47,6 +47,9 @@ namespace CompanionApplication
 
             if (settings.ScrollLongText) { checkBoxScroll.Checked = true; }
             else {checkBoxScroll.Checked = false; }
+
+            if (settings.DiscordPrefixEnable) { checkBoxDiscordPrefix.Checked = true; }
+            else { checkBoxDiscordPrefix.Checked = false; }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -91,6 +94,9 @@ namespace CompanionApplication
 
             if (checkBoxScroll.Checked) { settings.ScrollLongText = true; }
             else { settings.ScrollLongText = false; }
+
+            if (checkBoxDiscordPrefix.Checked) { settings.DiscordPrefixEnable = true; }
+            else { settings.DiscordPrefixEnable = false; }
 
             if (allOK)
             {

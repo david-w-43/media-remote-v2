@@ -71,7 +71,12 @@ namespace CompanionApplication.Discord
                             case DiscordVerbosity.full:
 
                                 // Shorten title and artist if necessary
-                                string title = prefix + values.title;
+                                string title = values.title;
+                                if (Properties.Settings.Default.DiscordPrefixEnable)
+                                {
+                                    title = prefix + title;
+                                }
+
                                 if (title.Length >= 127) { title = title.Substring(0, 123) + "..."; }
                                 if (artist.Length >= 127) { artist = artist.Substring(0, 123) + "..."; }
 

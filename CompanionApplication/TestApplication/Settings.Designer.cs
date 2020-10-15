@@ -48,6 +48,10 @@
             this.btnClockSync = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.groupWheelSensitivity = new System.Windows.Forms.GroupBox();
+            this.radioSensitivity25 = new System.Windows.Forms.RadioButton();
+            this.radioSensitivity50 = new System.Windows.Forms.RadioButton();
+            this.radioSensitivity100 = new System.Windows.Forms.RadioButton();
             this.tabPageApplication = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.checkBoxScroll = new System.Windows.Forms.CheckBox();
@@ -57,11 +61,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPageVLC = new System.Windows.Forms.TabPage();
-            this.tabPageMedia = new System.Windows.Forms.TabPage();
-            this.groupWheelSensitivity = new System.Windows.Forms.GroupBox();
-            this.radioSensitivity100 = new System.Windows.Forms.RadioButton();
-            this.radioSensitivity50 = new System.Windows.Forms.RadioButton();
-            this.radioSensitivity25 = new System.Windows.Forms.RadioButton();
+            this.tabPageDiscord = new System.Windows.Forms.TabPage();
+            this.checkBoxDiscordPrefix = new System.Windows.Forms.CheckBox();
             this.tableVLCControls.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableButtons.SuspendLayout();
@@ -69,11 +70,12 @@
             this.tabControlSettings.SuspendLayout();
             this.tabPageDevice.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
+            this.groupWheelSensitivity.SuspendLayout();
             this.tabPageApplication.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.radioGroup.SuspendLayout();
             this.tabPageVLC.SuspendLayout();
-            this.groupWheelSensitivity.SuspendLayout();
+            this.tabPageDiscord.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableVLCControls
@@ -241,7 +243,7 @@
             this.tabControlSettings.Controls.Add(this.tabPageDevice);
             this.tabControlSettings.Controls.Add(this.tabPageApplication);
             this.tabControlSettings.Controls.Add(this.tabPageVLC);
-            this.tabControlSettings.Controls.Add(this.tabPageMedia);
+            this.tabControlSettings.Controls.Add(this.tabPageDiscord);
             this.tabControlSettings.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlSettings.Location = new System.Drawing.Point(3, 3);
             this.tabControlSettings.Name = "tabControlSettings";
@@ -307,6 +309,58 @@
             this.label4.Size = new System.Drawing.Size(88, 13);
             this.label4.TabIndex = 1;
             this.label4.Text = "Wheel Sensitivity";
+            // 
+            // groupWheelSensitivity
+            // 
+            this.groupWheelSensitivity.Controls.Add(this.radioSensitivity25);
+            this.groupWheelSensitivity.Controls.Add(this.radioSensitivity50);
+            this.groupWheelSensitivity.Controls.Add(this.radioSensitivity100);
+            this.groupWheelSensitivity.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupWheelSensitivity.Location = new System.Drawing.Point(123, 76);
+            this.groupWheelSensitivity.Name = "groupWheelSensitivity";
+            this.groupWheelSensitivity.Size = new System.Drawing.Size(301, 170);
+            this.groupWheelSensitivity.TabIndex = 2;
+            this.groupWheelSensitivity.TabStop = false;
+            this.groupWheelSensitivity.Text = "Wheel Sensitivity";
+            // 
+            // radioSensitivity25
+            // 
+            this.radioSensitivity25.AutoSize = true;
+            this.radioSensitivity25.Cursor = System.Windows.Forms.Cursors.Default;
+            this.radioSensitivity25.Location = new System.Drawing.Point(6, 66);
+            this.radioSensitivity25.Name = "radioSensitivity25";
+            this.radioSensitivity25.Size = new System.Drawing.Size(45, 17);
+            this.radioSensitivity25.TabIndex = 0;
+            this.radioSensitivity25.TabStop = true;
+            this.radioSensitivity25.Text = "25%";
+            this.radioSensitivity25.UseVisualStyleBackColor = true;
+            this.radioSensitivity25.CheckedChanged += new System.EventHandler(this.SensitivityChanged);
+            // 
+            // radioSensitivity50
+            // 
+            this.radioSensitivity50.AutoSize = true;
+            this.radioSensitivity50.Cursor = System.Windows.Forms.Cursors.Default;
+            this.radioSensitivity50.Location = new System.Drawing.Point(7, 43);
+            this.radioSensitivity50.Name = "radioSensitivity50";
+            this.radioSensitivity50.Size = new System.Drawing.Size(45, 17);
+            this.radioSensitivity50.TabIndex = 0;
+            this.radioSensitivity50.TabStop = true;
+            this.radioSensitivity50.Text = "50%";
+            this.radioSensitivity50.UseVisualStyleBackColor = true;
+            this.radioSensitivity50.CheckedChanged += new System.EventHandler(this.SensitivityChanged);
+            // 
+            // radioSensitivity100
+            // 
+            this.radioSensitivity100.AutoSize = true;
+            this.radioSensitivity100.Cursor = System.Windows.Forms.Cursors.Default;
+            this.radioSensitivity100.Location = new System.Drawing.Point(7, 20);
+            this.radioSensitivity100.Name = "radioSensitivity100";
+            this.radioSensitivity100.Size = new System.Drawing.Size(51, 17);
+            this.radioSensitivity100.TabIndex = 0;
+            this.radioSensitivity100.TabStop = true;
+            this.radioSensitivity100.Text = "100%";
+            this.radioSensitivity100.UseVisualStyleBackColor = true;
+            this.radioSensitivity100.CheckedChanged += new System.EventHandler(this.SensitivityChanged);
             // 
             // tabPageApplication
             // 
@@ -414,67 +468,26 @@
             this.tabPageVLC.Text = "VLC";
             this.tabPageVLC.UseVisualStyleBackColor = true;
             // 
-            // tabPageMedia
+            // tabPageDiscord
             // 
-            this.tabPageMedia.Location = new System.Drawing.Point(4, 22);
-            this.tabPageMedia.Name = "tabPageMedia";
-            this.tabPageMedia.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageMedia.Size = new System.Drawing.Size(433, 255);
-            this.tabPageMedia.TabIndex = 2;
-            this.tabPageMedia.Text = "System Media";
-            this.tabPageMedia.UseVisualStyleBackColor = true;
+            this.tabPageDiscord.Controls.Add(this.checkBoxDiscordPrefix);
+            this.tabPageDiscord.Location = new System.Drawing.Point(4, 22);
+            this.tabPageDiscord.Name = "tabPageDiscord";
+            this.tabPageDiscord.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageDiscord.Size = new System.Drawing.Size(433, 255);
+            this.tabPageDiscord.TabIndex = 2;
+            this.tabPageDiscord.Text = "Discord";
+            this.tabPageDiscord.UseVisualStyleBackColor = true;
             // 
-            // groupWheelSensitivity
+            // checkBoxDiscordPrefix
             // 
-            this.groupWheelSensitivity.Controls.Add(this.radioSensitivity25);
-            this.groupWheelSensitivity.Controls.Add(this.radioSensitivity50);
-            this.groupWheelSensitivity.Controls.Add(this.radioSensitivity100);
-            this.groupWheelSensitivity.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupWheelSensitivity.Location = new System.Drawing.Point(123, 76);
-            this.groupWheelSensitivity.Name = "groupWheelSensitivity";
-            this.groupWheelSensitivity.Size = new System.Drawing.Size(301, 170);
-            this.groupWheelSensitivity.TabIndex = 2;
-            this.groupWheelSensitivity.TabStop = false;
-            this.groupWheelSensitivity.Text = "Wheel Sensitivity";
-            // 
-            // radioSensitivity100
-            // 
-            this.radioSensitivity100.AutoSize = true;
-            this.radioSensitivity100.Cursor = System.Windows.Forms.Cursors.Default;
-            this.radioSensitivity100.Location = new System.Drawing.Point(7, 20);
-            this.radioSensitivity100.Name = "radioSensitivity100";
-            this.radioSensitivity100.Size = new System.Drawing.Size(51, 17);
-            this.radioSensitivity100.TabIndex = 0;
-            this.radioSensitivity100.TabStop = true;
-            this.radioSensitivity100.Text = "100%";
-            this.radioSensitivity100.UseVisualStyleBackColor = true;
-            this.radioSensitivity100.CheckedChanged += new System.EventHandler(this.SensitivityChanged);
-            // 
-            // radioSensitivity50
-            // 
-            this.radioSensitivity50.AutoSize = true;
-            this.radioSensitivity50.Cursor = System.Windows.Forms.Cursors.Default;
-            this.radioSensitivity50.Location = new System.Drawing.Point(7, 43);
-            this.radioSensitivity50.Name = "radioSensitivity50";
-            this.radioSensitivity50.Size = new System.Drawing.Size(45, 17);
-            this.radioSensitivity50.TabIndex = 0;
-            this.radioSensitivity50.TabStop = true;
-            this.radioSensitivity50.Text = "50%";
-            this.radioSensitivity50.UseVisualStyleBackColor = true;
-            this.radioSensitivity50.CheckedChanged += new System.EventHandler(this.SensitivityChanged);
-            // 
-            // radioSensitivity25
-            // 
-            this.radioSensitivity25.AutoSize = true;
-            this.radioSensitivity25.Cursor = System.Windows.Forms.Cursors.Default;
-            this.radioSensitivity25.Location = new System.Drawing.Point(6, 66);
-            this.radioSensitivity25.Name = "radioSensitivity25";
-            this.radioSensitivity25.Size = new System.Drawing.Size(45, 17);
-            this.radioSensitivity25.TabIndex = 0;
-            this.radioSensitivity25.TabStop = true;
-            this.radioSensitivity25.Text = "25%";
-            this.radioSensitivity25.UseVisualStyleBackColor = true;
-            this.radioSensitivity25.CheckedChanged += new System.EventHandler(this.SensitivityChanged);
+            this.checkBoxDiscordPrefix.AutoSize = true;
+            this.checkBoxDiscordPrefix.Location = new System.Drawing.Point(6, 6);
+            this.checkBoxDiscordPrefix.Name = "checkBoxDiscordPrefix";
+            this.checkBoxDiscordPrefix.Size = new System.Drawing.Size(202, 17);
+            this.checkBoxDiscordPrefix.TabIndex = 0;
+            this.checkBoxDiscordPrefix.Text = "\"Listening to: / Watching video:\" text";
+            this.checkBoxDiscordPrefix.UseVisualStyleBackColor = true;
             // 
             // Settings
             // 
@@ -500,14 +513,16 @@
             this.tabPageDevice.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
+            this.groupWheelSensitivity.ResumeLayout(false);
+            this.groupWheelSensitivity.PerformLayout();
             this.tabPageApplication.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.radioGroup.ResumeLayout(false);
             this.radioGroup.PerformLayout();
             this.tabPageVLC.ResumeLayout(false);
-            this.groupWheelSensitivity.ResumeLayout(false);
-            this.groupWheelSensitivity.PerformLayout();
+            this.tabPageDiscord.ResumeLayout(false);
+            this.tabPageDiscord.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -526,7 +541,7 @@
         private System.Windows.Forms.TabControl tabControlSettings;
         private System.Windows.Forms.TabPage tabPageDevice;
         private System.Windows.Forms.TabPage tabPageVLC;
-        private System.Windows.Forms.TabPage tabPageMedia;
+        private System.Windows.Forms.TabPage tabPageDiscord;
         private System.Windows.Forms.Button btnClockSync;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TextBox txtVLCFilepath;
@@ -546,5 +561,6 @@
         private System.Windows.Forms.RadioButton radioSensitivity100;
         private System.Windows.Forms.RadioButton radioSensitivity50;
         private System.Windows.Forms.RadioButton radioSensitivity25;
+        private System.Windows.Forms.CheckBox checkBoxDiscordPrefix;
     }
 }
