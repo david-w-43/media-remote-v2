@@ -22,8 +22,10 @@ namespace CompanionApplication
         public Command(string identifier, string parameter)
         {
             this.identifier = identifier;
-            this.parameter = parameter;
-            this.parameterLength = parameter.Length;
+
+            // Remove diacritics
+            this.parameter = ASCIIconverter(parameter);
+            this.parameterLength = this.parameter.Length;
         }
 
         /// <summary>
@@ -74,6 +76,13 @@ namespace CompanionApplication
         public string Format()
         {
             return identifier + "(" + parameterLength + "|" + parameter + ")";
+        }
+
+        public string ASCIIconverter(string input)
+        {
+            byte[] temp;
+            temp = Encoding.GetEncoding("ISO-8859-8").GetBytes(input);
+            return Encoding.ASCII.GetString(temp);
         }
     }
 
@@ -281,7 +290,7 @@ namespace CompanionApplication
         {
             foreach (Command command in commands)
             {
-                 Send(command);
+                Send(command);
             }
         }
 
